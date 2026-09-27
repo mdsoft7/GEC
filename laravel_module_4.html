@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MODULE 4: Request Handling, Form Processing, and Eloquent ORM</title>
+    <style>
+        :root {
+            --primary: #f55247;
+            --primary-hover: #d93c31;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #f8fafc;
+            --highlight-bg: #fef2f2;
+            --highlight-border: #fca5a5;
+            --accent-blue: #2563eb;
+            --accent-green: #16a34a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+            border-bottom: 4px solid var(--primary);
+        }
+
+        header .container {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 0 0 10px 0;
+            color: #ffffff;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: #0f172a;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        h3 {
+            color: var(--primary);
+            margin-top: 25px;
+            font-size: 1.2rem;
+        }
+
+        h4 {
+            color: var(--text-main);
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+        p, li {
+            font-size: 0.98rem;
+        }
+
+        ul, ol {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border: 1px solid #334155;
+        }
+
+        code {
+            font-family: "Consolas", "Courier New", Courier, monospace;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* Alert / Callout Boxes */
+        .callout {
+            background-color: var(--highlight-bg);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 0 6px 6px 0;
+            margin: 20px 0;
+        }
+
+        .callout-warning {
+            background-color: #fffbe3;
+            border-left-color: #d97706;
+        }
+
+        .callout-info {
+            background-color: #eff6ff;
+            border-left-color: var(--accent-blue);
+        }
+
+        /* Flow Diagram Container */
+        .diagram {
+            background-color: #0f172a;
+            color: #38bdf8;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+            font-size: 0.82rem;
+            line-height: 1.3;
+        }
+
+        /* Quick Navigation */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .nav-grid a {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-grid a:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <h1>MODULE 4: Request Handling, Form Processing, and Eloquent ORM</h1>
+            <p class="subtitle">Complete Technical Guide & Exam Reference Manual for Laravel Developers</p>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- Table of Contents Card -->
+        <div class="card">
+            <h2>🧭 Module Navigation</h2>
+            <div class="nav-grid">
+                <a href="#arch">Architecture Flow</a>
+                <a href="#vocab">Key Vocabulary</a>
+                <a href="#sec-1">1. Request Handling</a>
+                <a href="#sec-2">2. CSRF Protection</a>
+                <a href="#sec-3">3. Old Input</a>
+                <a href="#sec-4">4. Errors & Flash Data</a>
+                <a href="#sec-5">5. Validation Rules</a>
+                <a href="#sec-6">6. Form Requests</a>
+                <a href="#sec-7">7. .env Configuration</a>
+                <a href="#sec-8">8. MySQL Connection</a>
+                <a href="#sec-9">9. Database Migrations</a>
+                <a href="#sec-10">10. Migration Commands</a>
+                <a href="#sec-11">11. Models & Eloquent</a>
+                <a href="#sec-12">12. Reading Data</a>
+                <a href="#sec-13">13. Query Builders</a>
+                <a href="#sec-14">14. CRUD Operations</a>
+                <a href="#sec-15">15. End-to-End App</a>
+                <a href="#sec-16">16. Feature Matrix</a>
+                <a href="#sec-17">17. Artisan Commands</a>
+                <a href="#sec-18">18. Security Rules</a>
+                <a href="#sec-19">19. Practice Questions</a>
+            </div>
+        </div>
+
+        <!-- Module Architecture -->
+        <div class="card" id="arch">
+            <h2>🧭 Module Architecture & Data Flow</h2>
+            <p>Below is the end-to-end HTTP request/response lifecycle inside Laravel when processing web forms and interacting with the database via Eloquent ORM:</p>
+            <div class="diagram">
++---------------------------------------------------------------------------------------------------+
+|                                      BROWSER / CLIENT                                             |
++---------------------------------------------------------------------------------------------------+
+                                   |                               ^
+        1. HTTP GET / POST Request |                               | 10. HTTP HTML Response 
+           (Form Data + @csrf)     v                               |     (or Redirect back with Errors/Flash)
++---------------------------------------------------------------------------------------------------+
+|                                  WEB ROUTES (routes/web.php)                                      |
+|                             Routes request to designated Controller                               |
++---------------------------------------------------------------------------------------------------+
+                                   |
+                                   v
++---------------------------------------------------------------------------------------------------+
+|                                  MIDDLEWARE PIPELINE                                              |
+|                  • VerifyCsrfToken Middleware (Validates @csrf token)                             |
++---------------------------------------------------------------------------------------------------+
+                                   |
+                                   v
++---------------------------------------------------------------------------------------------------+
+|                                  RESOURCE CONTROLLER                                              |
+|                           (e.g., StudentController@store)                                         |
+|                                                                                                   |
+|  2. Form Validation -------------------> [Validation Fails?] ---> Redirect Back + withInput()     |
+|     $request->validate([...])                                      + withErrors()                 |
+|            |                                                                                      |
+|     [Validation Passes]                                                                           |
+|            v                                                                                      |
+|  3. Call Eloquent Model                                                                           |
++---------------------------------------------------------------------------------------------------+
+           |
+           v
++---------------------------------------------------------------------------------------------------+
+|                                     ELOQUENT ORM & MODEL                                          |
+|                                (App\Models\Student.php)                                           |
+|                   Maps PHP Objects &lt;----&gt; SQL Statements ($fillable protection)                  |
++---------------------------------------------------------------------------------------------------+
+           |
+           v
++---------------------------------------------------------------------------------------------------+
+|                                DATABASE LAYER (MySQL)                                             |
+|                             Executes Insert / Select / Update                                     |
++---------------------------------------------------------------------------------------------------+
+           |
+           v
++---------------------------------------------------------------------------------------------------+
+|                                 BLADE VIEW TEMPLATE                                               |
+|                    Renders $errors, old(), session('success'), $data                              |
++---------------------------------------------------------------------------------------------------+
+            </div>
+        </div>
+
+        <!-- Vocabulary -->
+        <div class="card" id="vocab">
+            <h2>🔑 Key Vocabulary & Definitions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Keyword</th>
+                        <th>Technical Definition</th>
+                        <th>Practical Real-World Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>HTTP Request</strong></td>
+                        <td>An incoming payload/message sent from a client (browser) to the web server containing input parameters, headers, cookies, and uploaded files.</td>
+                        <td>Fetching submitted student records from a form via <code>$request->input('name')</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CSRF Token</strong></td>
+                        <td>A unique, secret server-side cryptographic token generated to verify that the incoming POST/PUT request is coming from the authentic application user and not a malicious site.</td>
+                        <td>Including <code>@csrf</code> inside a Blade form, which generates <code>&lt;input type="hidden" name="_token" value="xyz123..."&gt;</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Old Input</strong></td>
+                        <td>Flash-session mechanism in Laravel that temporarily retains submitted form values across a single HTTP redirect when validation fails.</td>
+                        <td>Repopulating a user's typed name using <code>value="{{ old('name') }}"</code> so they don't have to re-type it after an error.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Flash Data</strong></td>
+                        <td>Temporary session data that lasts exclusively for the immediate next HTTP request, after which it is automatically cleared.</td>
+                        <td>Sending a success alert banner using <code>return redirect()->with('success', 'Student created!');</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Validation Rule</strong></td>
+                        <td>A constraint defined on form input fields to ensure incoming data conforms to specific application business logic before database insertion.</td>
+                        <td>Setting <code>'email' => 'required|email|unique:students,email'</code> to prevent empty or duplicate emails.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database Migration</strong></td>
+                        <td>A version-controlled, programmatic blueprint written in PHP that defines, modifies, or drops database tables without running raw SQL queries.</td>
+                        <td>Executing <code>php artisan migrate</code> to automatically create the <code>students</code> table in MySQL.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Eloquent ORM</strong></td>
+                        <td>Object-Relational Mapper in Laravel that maps database tables to PHP Model classes, allowing developers to query databases using object-oriented syntax.</td>
+                        <td>Writing <code>Student::all()</code> instead of executing <code>SELECT * FROM students;</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mass Assignment</strong></td>
+                        <td>A feature that allows passing an array of key-value pairs directly to a model method like <code>Student::create($array)</code> to populate multiple columns at once.</td>
+                        <td>Populating model columns safely when <code>$fillable = ['name', 'email', 'course', 'age']</code> is explicitly declared in the model.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 1 -->
+        <div class="card" id="sec-1">
+            <h2>1. Request Handling and Form Processing</h2>
+            
+            <h3>1.1 What is an HTTP Request?</h3>
+            <p>A <strong>Request</strong> in Laravel is represented by the <code>Illuminate\Http\Request</code> instance. It abstracts incoming client parameters from multiple data sources into a unified API:</p>
+            
+            <div class="diagram">
+                                  INCOMING REQUEST DATA
+                                            │
+        ┌───────────────────┬───────────────┴───────────────┬───────────────────┐
+        │                   │                               │                   │
+        ▼                   ▼                               ▼                   ▼
+┌───────────────┐   ┌───────────────┐               ┌───────────────┐   ┌───────────────┐
+│ GET Query Data│   │ POST Form Data│               │ Route Params  │   │ Uploaded Files│
+│  (?course=)   │   │  (Form Inputs)│               │  /{id}        │   │  (file/photo) │
+└───────────────┘   └───────────────┘               └───────────────┘   └───────────────┘
+            </div>
+
+            <h4>Code Implementation: Accessing Data Sources</h4>
+<pre><code>use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+Route::post('/students/profile/{id}', function (Request $request, $id) {
+    // 1. GET query data: /students/profile/5?ref=admin
+    $referrer = $request->query('ref'); 
+
+    // 2. POST form data
+    $name = $request->input('name');
+
+    // 3. Route parameter
+    $studentId = $id; 
+
+    // 4. Uploaded file
+    if ($request->hasFile('photo')) {
+        $photo = $request->file('photo')->store('student_photos');
+    }
+
+    return "Processing Student ID: {$studentId} | Name: {$name}";
+});</code></pre>
+
+            <h3>1.2 Handling GET Forms</h3>
+            <p>GET forms append input key-value pairs directly to the URL query string.</p>
+            
+            <div class="diagram">
++-----------------------------------------------------------------------------------+
+| URL: http://127.0.0.1:8000/students/search?course=BCA                             |
+|                                             ▲                                     |
+|                                             └────── Query String Parameter        |
++-----------------------------------------------------------------------------------+
+            </div>
+
+            <h4>Code Implementation (GET Form Handling):</h4>
+            <p><strong>Blade Template (<code>resources/views/students/search.blade.php</code>):</strong></p>
+
+<pre><code>&lt;form method="GET" action="/students/search"&gt;
+    &lt;label for="course"&gt;Search Course:&lt;/label&gt;
+    &lt;input type="text" id="course" name="course" value="{{ request('course') }}"&gt;
+    &lt;button type="submit"&gt;Search&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+            <p><strong>Web Route (<code>routes/web.php</code>):</strong></p>
+<pre><code>use Illuminate\Http\Request;
+
+Route::get('/students/search', function (Request $request) {
+    // Retrieve value from URL query string ?course=BCA
+    $course = $request->query('course', 'All'); // 'All' is default
+    return "Searching for students enrolled in: " . $course;
+});</code></pre>
+
+            <div class="callout callout-warning">
+                <strong>Security Warning:</strong> Never use GET forms for sensitive inputs like passwords, auth credentials, or credit card numbers, as data is visible in browser histories, server logs, and web bookmarks.
+            </div>
+
+            <h3>1.3 Handling POST Forms</h3>
+            <p>POST forms pass input payload securely within the HTTP request body.</p>
+
+            <h4>Code Implementation (POST Form Handling):</h4>
+            <p><strong>Blade Template (<code>resources/views/students/create.blade.php</code>):</strong></p>
+<pre><code>&lt;form method="POST" action="/students"&gt;
+    @csrf &lt;!-- Mandatory CSRF Security Token --&gt;
+    &lt;input type="text" name="name" placeholder="Enter Name"&gt;
+    &lt;input type="email" name="email" placeholder="Enter Email"&gt;
+    &lt;button type="submit"&gt;Save Student&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+            <p><strong>Web Route (<code>routes/web.php</code>):</strong></p>
+<pre><code>use Illuminate\Http\Request;
+
+Route::post('/students', function (Request $request) {
+    $name = $request->input('name');
+    $email = $request->input('email');
+
+    return "Saved Student: " . $name . " (" . $email . ")";
+});</code></pre>
+
+            <h3>1.4 Essential Request Helper Methods</h3>
+<pre><code>// 1. $request->input(): Get input value (supports default value)
+$name = $request->input('name', 'Guest'); // Output: 'Guest' if 'name' is missing
+
+// 2. $request->only(): Retrieve specific subset of keys
+$credentials = $request->only(['email', 'password']); // Returns key-value array
+
+// 3. $request->except(): Exclude specific keys
+$userData = $request->except(['_token', 'password_confirmation']);
+
+// 4. $request->has(): Check if field exists in request
+if ($request->has('email')) {
+    // Executes if key exists (even if string is empty)
+}
+
+// 5. $request->filled(): Check if field exists AND is not empty
+if ($request->filled('email')) {
+    // Executes only if email contains a non-empty value
+}
+
+// 6. $request->all(): Get all inputs as an associative array
+$allInputs = $request->all();</code></pre>
+
+            <h3>1.5 GET vs POST Feature Comparison</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>GET Method</th>
+                        <th>POST Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Primary Purpose</strong></td>
+                        <td>Fetch, filter, search, or read data.</td>
+                        <td>Create, update, or modify application state.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Payload Location</strong></td>
+                        <td>Appended to URL query string (<code>?key=val</code>).</td>
+                        <td>Encapsulated inside HTTP Request Body.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bookmarkable?</strong></td>
+                        <td><strong>Yes</strong> (URL retains full parameter state).</td>
+                        <td><strong>No</strong> (Re-submitting prompts browser warning).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sensitive Data Safety</strong></td>
+                        <td><strong>Unsafe</strong> (Exposed in history, logs, URLs).</td>
+                        <td><strong>Preferred</strong> (Hidden from browser address bar).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Typical Real-World Use</strong></td>
+                        <td>Search filters, pagination, report lookup.</td>
+                        <td>User registration, logins, payment processing.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="card" id="sec-2">
+            <h2>2. CSRF Protection in Laravel</h2>
+            <p><strong>Cross-Site Request Forgery (CSRF)</strong> is a malicious exploit where unauthorized commands are submitted from a trusted user's browser to a vulnerable web application without their knowledge.</p>
+
+            <div class="diagram">
++-------------------+             2. Hidden Attack Link            +-------------------------+
+|  Malicious Site   | -------------------------------------------> |   User's Browser        |
+| (attacker.com)    |                                              | (Authenticated Session) |
++-------------------+                                              +-------------------------+
+                                                                                |
+                                                                                | 3. Unwanted POST request
+                                                                                |    without @csrf token
+                                                                                v
+                                                                   +-------------------------+
+                                                                   |   Target Laravel App    |
+                                                                   |  (419 PAGE EXPIRED)     |
+                                                                   +-------------------------+
+            </div>
+
+            <h3>Protection Workflow</h3>
+            <ol>
+                <li>When a user accesses a form, Laravel generates a unique token stored in their session.</li>
+                <li>The <code>@csrf</code> Blade directive renders a hidden HTML input containing this token:
+<pre><code>&lt;input type="hidden" name="_token" value="d9Fa8KjL09mNxQzP3vR1..."&gt;</code></pre>
+                </li>
+                <li>When submitted, the <code>VerifyCsrfToken</code> middleware compares the form token against the session token.</li>
+                <li>If tokens match, processing continues. If missing or invalid, Laravel aborts execution with HTTP <strong><code>419 Page Expired</code></strong>.</li>
+            </ol>
+
+            <div class="callout callout-info">
+                <strong>Mandatory Rule:</strong> Always place <code>@csrf</code> inside forms targeting <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, or <code>DELETE</code> routes.
+            </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="card" id="sec-3">
+            <h2>3. Retrieving Old Input</h2>
+            <p>When a validation check fails, Laravel redirects back to the previous page. Using the <code>old()</code> helper function ensures the form fields remain populated with the user's previously submitted data.</p>
+
+            <div class="diagram">
+User Fails Validation ----> Laravel Redirects Back ----> old('field') repopulates HTML inputs
+            </div>
+
+            <h3>Complete Blade Input Repopulation Example</h3>
+<pre><code>&lt;form method="POST" action="/students"&gt;
+    @csrf
+
+    &lt;!-- 1. Text Input Repopulation --&gt;
+    &lt;label&gt;Student Name:&lt;/label&gt;
+    &lt;input type="text" name="name" value="{{ old('name') }}"&gt;
+
+    &lt;!-- 2. Email Input Repopulation --&gt;
+    &lt;label&gt;Email Address:&lt;/label&gt;
+    &lt;input type="email" name="email" value="{{ old('email') }}"&gt;
+
+    &lt;!-- 3. Dropdown Repopulation --&gt;
+    &lt;label&gt;Select Course:&lt;/label&gt;
+    &lt;select name="course"&gt;
+        &lt;option value=""&gt;-- Select --&lt;/option&gt;
+        &lt;option value="BCA" {{ old('course') == 'BCA' ? 'selected' : '' }}&gt;BCA&lt;/option&gt;
+        &lt;option value="MCA" {{ old('course') == 'MCA' ? 'selected' : '' }}&gt;MCA&lt;/option&gt;
+        &lt;option value="BBA" {{ old('course') == 'BBA' ? 'selected' : '' }}&gt;BBA&lt;/option&gt;
+    &lt;/select&gt;
+
+    &lt;button type="submit"&gt;Submit Record&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+            <h4>Manual Controller Redirect with Old Input</h4>
+<pre><code>return redirect()->back()->withInput();</code></pre>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="card" id="sec-4">
+            <h2>4. Validation Errors and Flash Data</h2>
+
+            <h3>4.1 Displaying Validation Errors</h3>
+            <p>Laravel passes an <code>$errors</code> instance to Blade templates during validation redirects.</p>
+
+<pre><code>&lt;!-- Option 1: Displaying All Validation Errors at Top of Page --&gt;
+@if ($errors-&gt;any())
+    &lt;div style="color: red; border: 1px solid red; padding: 10px; margin-bottom: 10px;"&gt;
+        &lt;strong&gt;Please correct the following errors:&lt;/strong&gt;
+        &lt;ul&gt;
+            @foreach ($errors-&gt;all() as $error)
+                &lt;li&gt;{{ $error }}&lt;/li&gt;
+            @endforeach
+        &lt;/ul&gt;
+    &lt;/div&gt;
+@endif
+
+&lt;!-- Option 2: Inline Error Message Display Using @error directive --&gt;
+&lt;div&gt;
+    &lt;label&gt;Email:&lt;/label&gt;
+    &lt;input type="email" name="email" value="{{ old('email') }}"&gt;
+    
+    @error('email')
+        &lt;span style="color: red; font-size: 12px;"&gt;{{ $message }}&lt;/span&gt;
+    @enderror
+&lt;/div&gt;</code></pre>
+
+            <h3>4.2 Flash Data (Session Feedback)</h3>
+            <p><strong>Flash data</strong> stores key-value session messages exclusively for the next HTTP request.</p>
+
+            <div class="diagram">
+                  FLASH DATA LIFECYCLE
+                  
+ Request N (Store Data) ───> Session Flashed ───> Request N+1 (Display Banner) ───> Automatically Cleared
+            </div>
+
+            <h4>Setting Flash Data in Controller:</h4>
+<pre><code>public function store(Request $request)
+{
+    // After performing database save...
+    return redirect()-&gt;route('students.index')
+                     -&gt;with('success', 'Student record successfully added!');
+}</code></pre>
+
+            <h4>Rendering Flash Data in Blade:</h4>
+<pre><code>@if (session('success'))
+    &lt;div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 4px;"&gt;
+        {{ session('success') }}
+    &lt;/div&gt;
+@endif</code></pre>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="card" id="sec-5">
+            <h2>5. Form Validation Using Built-in Rules</h2>
+            <p>Form validation ensures incoming data adheres to defined constraints before reaching backend logic or the database.</p>
+
+<pre><code>$validatedData = $request->validate([
+    'name'   => 'required|string|min:3|max:100',
+    'email'  => 'required|email|unique:students,email',
+    'age'    => 'required|integer|min:16|max:60',
+    'course' => 'required|in:BCA,MCA,BBA',
+]);</code></pre>
+
+            <h3>Comprehensive Reference Table of Validation Rules</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rule</th>
+                        <th>Technical Definition</th>
+                        <th>Real-World Code Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>required</code></td><td>Field must be present and contain non-whitespace input.</td><td><code>'name' => 'required'</code></td></tr>
+                    <tr><td><code>nullable</code></td><td>Field can be empty or null; applies validation rules only if present.</td><td><code>'middle_name' => 'nullable|string'</code></td></tr>
+                    <tr><td><code>string</code></td><td>Field must be valid string data type.</td><td><code>'city' => 'string'</code></td></tr>
+                    <tr><td><code>email</code></td><td>Field must match standard email address format.</td><td><code>'email' => 'email'</code></td></tr>
+                    <tr><td><code>min:value</code></td><td>Defines minimum character length for strings or minimum numerical value.</td><td><code>'password' => 'min:8'</code></td></tr>
+                    <tr><td><code>max:value</code></td><td>Defines maximum character length for strings or maximum numerical value.</td><td><code>'summary' => 'max:500'</code></td></tr>
+                    <tr><td><code>integer</code></td><td>Field must be a valid integer value.</td><td><code>'age' => 'integer'</code></td></tr>
+                    <tr><td><code>numeric</code></td><td>Field must be numeric (allows integers and floats).</td><td><code>'gpa' => 'numeric'</code></td></tr>
+                    <tr><td><code>unique:table,col</code></td><td>Ensures input value does not already exist in the specified table column.</td><td><code>'email' => 'unique:students,email'</code></td></tr>
+                    <tr><td><code>exists:table,col</code></td><td>Validates that input exists within specified database table column.</td><td><code>'dept_id' => 'exists:departments,id'</code></td></tr>
+                    <tr><td><code>confirmed</code></td><td>Field must match an accompanying <code>{field}_confirmation</code> input.</td><td><code>'password' => 'confirmed'</code></td></tr>
+                    <tr><td><code>same:field</code></td><td>Value must match another named input field.</td><td><code>'alt_email' => 'same:primary_email'</code></td></tr>
+                    <tr><td><code>different:field</code></td><td>Value must differ from another named input field.</td><td><code>'new_pass' => 'different:old_pass'</code></td></tr>
+                    <tr><td><code>in:foo,bar</code></td><td>Value must match one of the listed options.</td><td><code>'gender' => 'in:Male,Female,Other'</code></td></tr>
+                    <tr><td><code>date</code></td><td>Value must be a valid date parseable by <code>strtotime</code>.</td><td><code>'dob' => 'date'</code></td></tr>
+                    <tr><td><code>boolean</code></td><td>Value must be parseable as boolean.</td><td><code>'is_active' => 'boolean'</code></td></tr>
+                    <tr><td><code>digits:value</code></td><td>Field must be numeric and have exact specified length.</td><td><code>'phone' => 'digits:10'</code></td></tr>
+                    <tr><td><code>image</code></td><td>Uploaded file must be an image format.</td><td><code>'avatar' => 'image'</code></td></tr>
+                    <tr><td><code>mimes:ext1,...</code></td><td>Limits uploaded file extension to defined types.</td><td><code>'document' => 'mimes:pdf,docx'</code></td></tr>
+                    <tr><td><code>sometimes</code></td><td>Runs validation checks only if field is present in request.</td><td><code>'discount' => 'sometimes|numeric'</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 6 -->
+        <div class="card" id="sec-6">
+            <h2>6. Custom Validation Messages & Form Requests</h2>
+
+            <h3>6.1 Custom Validation Messages</h3>
+<pre><code>$messages = [
+    'name.required'  => 'Please provide the student\'s full name.',
+    'email.required' => 'The email address is mandatory for registration.',
+    'email.unique'   => 'This email address is already assigned to an existing student.',
+    'age.min'        => 'Students must be at least 16 years old to enroll.',
+];
+
+$validated = $request->validate([
+    'name'  => 'required|string|max:100',
+    'email' => 'required|email|unique:students,email',
+    'age'   => 'required|integer|min:16',
+], $messages);</code></pre>
+
+            <h3>6.2 Form Request Classes</h3>
+            <p>For larger applications, move validation rules into dedicated Request classes:</p>
+
+            <h4>Step 1: Generate Form Request via Artisan</h4>
+<pre><code>php artisan make:request StoreStudentRequest</code></pre>
+
+            <h4>Step 2: Configure Request Class (<code>app/Http/Requests/StoreStudentRequest.php</code>)</h4>
+<pre><code>namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreStudentRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true; // Set to true to authorize execution
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name'   => 'required|string|max:100',
+            'email'  => 'required|email|unique:students,email',
+            'course' => 'required|in:BCA,MCA,BBA',
+            'age'    => 'required|integer|min:16|max:60',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Student name is strictly required.',
+            'email.unique'  => 'This email address is already in use.',
+        ];
+    }
+}</code></pre>
+
+            <h4>Step 3: Type-Hint in Controller Method</h4>
+<pre><code>use App\Http\Requests\StoreStudentRequest;
+use App\Models\Student;
+
+public function store(StoreStudentRequest $request)
+{
+    // Validated data is automatically extracted upon passing authorization/rules
+    $validated = $request->validated();
+
+    Student::create($validated);
+
+    return redirect()->route('students.index')->with('success', 'Student added!');
+}</code></pre>
+        </div>
+
+        <!-- Section 7 -->
+        <div class="card" id="sec-7">
+            <h2>7. Database Configuration Using .env File</h2>
+            <p>Laravel manages environment-specific variables using the <code>.env</code> file in the root directory.</p>
+
+            <div class="diagram">
++-----------------------------------------------------------------------------------+
+|                        LARAVEL DATABASE CONNECTION (.env)                         |
++-----------------------------------------------------------------------------------+
+| DB_CONNECTION=mysql          &lt;-- Database Driver                                 |
+| DB_HOST=127.0.0.1            &lt;-- Database Server IP / Hostname                   |
+| DB_PORT=3306                 &lt;-- MySQL Port Number                                |
+| DB_DATABASE=student_db       &lt;-- Target Database Name                             |
+| DB_USERNAME=root             &lt;-- Database Username                                |
+| DB_PASSWORD=secret           &lt;-- Database Password                                |
++-----------------------------------------------------------------------------------+
+            </div>
+
+            <div class="callout callout-info">
+                <strong>Configuration Cache Command:</strong> If you modify <code>.env</code> variables and changes fail to reflect, clear the cached configuration:
+                <br><code>php artisan config:clear</code>
+            </div>
+        </div>
+
+        <!-- Section 8 -->
+        <div class="card" id="sec-8">
+            <h2>8. Connecting Laravel with MySQL</h2>
+            <p>Follow this sequence to establish a database connection:</p>
+
+            <div class="diagram">
++──────────────────────────┐
+│  1. Start MySQL Server   │ (via XAMPP / WAMP / Native Service)
+└────────────┬─────────────┘
+             │
+             v
++──────────────────────────┐
+│  2. Create Database      │ Execute: CREATE DATABASE student_db;
+└────────────┬─────────────┘
+             │
+             v
++──────────────────────────┐
+│  3. Update .env File     │ Define DB_DATABASE=student_db & Credentials
+└────────────┬─────────────┘
+             │
+             v
++──────────────────────────┐
+│  4. Verify Connection    │ Execute: php artisan migrate:status
+└──────────────────────────┘
+            </div>
+        </div>
+
+        <!-- Section 9 -->
+        <div class="card" id="sec-9">
+            <h2>9. Introduction to Migrations</h2>
+            <p>A <strong>Migration</strong> serves as version control for your database, allowing developers to define, alter, and share schema structures using standard PHP code.</p>
+
+            <div class="diagram">
+                   MIGRATION ARCHITECTURE
+                   
+  PHP Migration File ──────> php artisan migrate ──────> MySQL Database Table
+ (Blueprint Definition)                                  (Physical Structure)
+            </div>
+
+            <h3>Creating Migration File</h3>
+<pre><code>php artisan make:migration create_students_table</code></pre>
+
+            <h3>Migration File Structure (<code>database/migrations/xxxx_xx_xx_create_students_table.php</code>)</h3>
+<pre><code>use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations (Creates Table).
+     */
+    public function up(): void
+    {
+        Schema::create('students', function (Blueprint $table) {
+            $table->id();                                    // Auto-increment primary key
+            $table->string('name');                          // VARCHAR(255)
+            $table->string('email')->unique();               // VARCHAR(255) Unique
+            $table->string('course');                        // VARCHAR(255)
+            $table->unsignedInteger('age')->nullable();      // NULLABLE INT
+            $table->decimal('fees', 8, 2)->default(0.00);    // DECIMAL(8,2)
+            $table->boolean('is_active')->default(true);     // TINYINT(1) Default 1
+            $table->timestamps();                            // created_at & updated_at
+        });
+    }
+
+    /**
+     * Reverse the migrations (Drops Table).
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('students');
+    }
+};</code></pre>
+        </div>
+
+        <!-- Section 10 -->
+        <div class="card" id="sec-10">
+            <h2>10. Migration Artisan Commands</h2>
+
+            <div class="diagram">
+                              MIGRATION COMMAND LIFECYCLE
+                              
+                      ┌─────────────────────────────────────────┐
+                      │    php artisan make:migration ...       │
+                      └────────────────────┬────────────────────┘
+                                           │
+                                           v
+                      ┌─────────────────────────────────────────┐
+                      │          php artisan migrate            │
+                      └────────────────────┬────────────────────┘
+                                           │
+                    ┌──────────────────────┴──────────────────────┐
+                    │                                             │
+                    v                                             v
+┌───────────────────────────────────────┐     ┌───────────────────────────────────────┐
+│     php artisan migrate:rollback      │     │      php artisan migrate:fresh        │
+│       (Undoes Last Migration)         │     │     (Drops ALL Tables & Re-runs)      │
+└───────────────────────────────────────┘     └───────────────────────────────────────┘
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Artisan Command</th>
+                        <th>Purpose & Function</th>
+                        <th>Safety Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>php artisan make:migration &lt;name&gt;</code></td><td>Generates a new migration file blueprint.</td><td>Safe to run anytime.</td></tr>
+                    <tr><td><code>php artisan migrate</code></td><td>Executes all pending migrations against the DB.</td><td>Safe for production.</td></tr>
+                    <tr><td><code>php artisan migrate:status</code></td><td>Displays table listing showing run state (Ran / Pending).</td><td>Read-only command.</td></tr>
+                    <tr><td><code>php artisan migrate:rollback</code></td><td>Reverts the last batch of executed migrations.</td><td>Reverts recent schema changes.</td></tr>
+                    <tr><td><code>php artisan migrate:reset</code></td><td>Rollbacks all application migrations completely.</td><td>Drops existing tables.</td></tr>
+                    <tr><td><code>php artisan migrate:refresh</code></td><td>Rollbacks all migrations and re-executes them.</td><td><strong>Destructive</strong>: Clears table data.</td></tr>
+                    <tr><td><code>php artisan migrate:fresh</code></td><td>Drops ALL tables in database and runs migrations from start.</td><td><strong>DANGER</strong>: Wipes entire DB.</td></tr>
+                    <tr><td><code>php artisan migrate:fresh --seed</code></td><td>Wipes DB, re-executes migrations, and populates seeders.</td><td>Use in development only.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 11 -->
+        <div class="card" id="sec-11">
+            <h2>11. Models and Eloquent ORM</h2>
+            <p>An <strong>Eloquent Model</strong> represents a database table entity as a PHP Class.</p>
+
+            <div class="diagram">
+  PHP Class: App\Models\Student  <=================>  MySQL Table: students
+  Instance: $student             <=================>  Row: ID 1 ("Rahul")
+            </div>
+
+            <h3>Generating Model via Artisan</h3>
+<pre><code># Generate Model only
+php artisan make:model Student
+
+# Generate Model AND Migration simultaneously (Recommended)
+php artisan make:model Student -m</code></pre>
+
+            <h3>Model Declaration (<code>app/Models/Student.php</code>)</h3>
+<pre><code>namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Student extends Model
+{
+    use HasFactory;
+
+    // Mass-assignment protection: Define array of column names that can be safely inserted
+    protected $fillable = [
+        'name',
+        'email',
+        'course',
+        'age',
+    ];
+}</code></pre>
+        </div>
+
+        <!-- Section 12 -->
+        <div class="card" id="sec-12">
+            <h2>12. Fetching Data from Database (Eloquent Read Methods)</h2>
+
+<pre><code>use App\Models\Student;
+
+// 1. Get all records from table
+$allStudents = Student::all();
+
+// 2. Find primary key record (Returns null if not found)
+$student = Student::find(1);
+
+// 3. Find primary key OR throw 404 Http Exception if missing
+$student = Student::findOrFail($id);
+
+// 4. Fetch first matching record
+$bcaStudent = Student::where('course', 'BCA')->first();
+
+// 5. Filter records with condition operator
+$adults = Student::where('age', '>=', 18)->get();
+
+// 6. Sort results
+$sorted = Student::orderBy('name', 'asc')->get();
+
+// 7. Get latest records (sorted by created_at DESC)
+$latest = Student::latest()->get();
+
+// 8. Aggregate count
+$bcaCount = Student::where('course', 'BCA')->count();
+
+// 9. Pluck specific column list
+$emailList = Student::pluck('email'); // Array of emails
+
+// 10. Paginate results (10 items per page)
+$paginatedStudents = Student::latest()->paginate(10);</code></pre>
+        </div>
+
+        <!-- Section 13 -->
+        <div class="card" id="sec-13">
+            <h2>13. Eloquent Query Builder vs DB Facade</h2>
+            <p>Laravel allows querying database layers through <strong>Eloquent ORM</strong> (Model-based) or <strong>Query Builder</strong> (DB Facade).</p>
+
+            <h3>Eloquent Query Builder (Model Instance)</h3>
+<pre><code>use App\Models\Student;
+
+// Chaining Eloquent conditions
+$students = Student::where('course', 'BCA')
+                   ->where('age', '>=', 18)
+                   ->orderBy('name')
+                   ->get();</code></pre>
+
+            <h3>DB Facade Query Builder (Direct Table Instance)</h3>
+<pre><code>use Illuminate\Support\Facades\DB;
+
+// Querying directly via table name
+$students = DB::table('students')
+              ->where('course', 'BCA')
+              ->orderBy('name')
+              ->get();</code></pre>
+        </div>
+
+        <!-- Section 14 -->
+        <div class="card" id="sec-14">
+            <h2>14. Complete CRUD Operations Using Eloquent ORM</h2>
+            <p><strong>CRUD</strong> represents the four primary operations for database persistence:</p>
+
+            <div class="diagram">
+                     ┌───────────────┐
+                     │   C - Create  │
+                     └───────┬───────┘
+                             │
+     ┌───────────────┐       │       ┌───────────────┐
+     │   D - Delete  │ <─────┼─────> │   R - Read    │
+     └───────────────┘       │       └───────────────┘
+                             │
+                     ┌───────────────┐
+                     │   U - Update  │
+                     └───────────────┘
+            </div>
+
+            <h3>14.1 CREATE</h3>
+<pre><code>// Method A: Mass Assignment (Requires $fillable set in Model)
+$student = Student::create([
+    'name'   => 'Rahul Kumar',
+    'email'  => 'rahul@example.com',
+    'course' => 'BCA',
+    'age'    => 20,
+]);
+
+// Method B: Explicit Property Assignment
+$student = new Student();
+$student->name   = 'Rahul Kumar';
+$student->email  = 'rahul@example.com';
+$student->course = 'BCA';
+$student->age    = 20;
+$student->save();</code></pre>
+
+            <h3>14.2 READ</h3>
+<pre><code>// Fetch list of records
+$students = Student::latest()->get();
+
+// Fetch single record for detail view
+$student = Student::findOrFail($id);</code></pre>
+
+            <h3>14.3 UPDATE</h3>
+<pre><code>// Method A: Mass Update Array
+$student = Student::findOrFail($id);
+$student->update([
+    'name'   => 'Rahul Sharma',
+    'course' => 'MCA',
+]);
+
+// Method B: Manual Property Modification
+$student = Student::findOrFail($id);
+$student->name   = 'Rahul Sharma';
+$student->course = 'MCA';
+$student->save();</code></pre>
+
+            <h3>14.4 DELETE</h3>
+<pre><code>// Locate record and invoke delete
+$student = Student::findOrFail($id);
+$student->delete();</code></pre>
+        </div>
+
+        <!-- Section 15 -->
+        <div class="card" id="sec-15">
+            <h2>15. Complete Student Management System (End-to-End Practical Example)</h2>
+
+            <div class="diagram">
+[Step 1 & 2: Model & Migration] ───> [Step 3 & 4: Controller & Routes] ───> [Step 5-10: Blade Views]
+            </div>
+
+            <h3>Step 1: Create Model and Migration</h3>
+<pre><code>php artisan make:model Student -m</code></pre>
+
+            <h3>Step 2: Database Migration (<code>database/migrations/xxxx_create_students_table.php</code>)</h3>
+<pre><code>use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('students', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('course');
+            $table->unsignedInteger('age')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('students');
+    }
+};</code></pre>
+
+            <p>Run the migration:</p>
+<pre><code>php artisan migrate</code></pre>
+
+            <h3>Step 3: Configure Eloquent Model (<code>app/Models/Student.php</code>)</h3>
+<pre><code>namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Student extends Model
+{
+    protected $fillable = ['name', 'email', 'course', 'age'];
+}</code></pre>
+
+            <h3>Step 4: Create Resource Controller & Define Web Routes</h3>
+<pre><code>php artisan make:controller StudentController --resource</code></pre>
+
+            <p>Add the resource route to <strong><code>routes/web.php</code></strong>:</p>
+<pre><code>use App\Http\Controllers\StudentController;
+
+Route::resource('students', StudentController::class);</code></pre>
+
+            <h3>Step 5: Implement Resource Controller Logic (<code>app/Http/Controllers/StudentController.php</code>)</h3>
+<pre><code>namespace App\Http\Controllers;
+
+use App\Models\Student;
+use Illuminate\Http\Request;
+
+class StudentController extends Controller
+{
+    // READ: Display Student List
+    public function index()
+    {
+        $students = Student::latest()->paginate(10);
+        return view('students.index', compact('students'));
+    }
+
+    // CREATE: Render Add Student Form
+    public function create()
+    {
+        return view('students.create');
+    }
+
+    // CREATE: Store New Student Record
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'   => 'required|string|min:3|max:100',
+            'email'  => 'required|email|unique:students,email',
+            'course' => 'required|in:BCA,MCA,BBA',
+            'age'    => 'required|integer|min:16|max:60',
+        ], [
+            'name.required'  => 'Student name is required.',
+            'email.unique'   => 'This email is already registered.',
+            'course.in'      => 'Please select a valid course.',
+        ]);
+
+        Student::create($validated);
+
+        return redirect()->route('students.index')
+                         ->with('success', 'Student created successfully.');
+    }
+
+    // UPDATE: Render Edit Form
+    public function edit(Student $student)
+    {
+        return view('students.edit', compact('student'));
+    }
+
+    // UPDATE: Save Modifications
+    public function update(Request $request, Student $student)
+    {
+        $validated = $request->validate([
+            'name'   => 'required|string|min:3|max:100',
+            'email'  => 'required|email|unique:students,email,' . $student->id,
+            'course' => 'required|in:BCA,MCA,BBA',
+            'age'    => 'required|integer|min:16|max:60',
+        ]);
+
+        $student->update($validated);
+
+        return redirect()->route('students.index')
+                         ->with('success', 'Student updated successfully.');
+    }
+
+    // DELETE: Remove Record
+    public function destroy(Student $student)
+    {
+        $student->delete();
+
+        return redirect()->route('students.index')
+                         ->with('success', 'Student deleted successfully.');
+    }
+}</code></pre>
+
+            <h3>Step 6: Create Blade Views</h3>
+
+            <h4>A. Index View (<code>resources/views/students/index.blade.php</code>)</h4>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Student Directory&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+    &lt;h2&gt;Student Directory&lt;/h2&gt;
+
+    &lt;!-- Flash Message Notification --&gt;
+    @if (session('success'))
+        &lt;div style="color: green; padding: 10px;"&gt;{{ session('success') }}&lt;/div&gt;
+    @endif
+
+    &lt;a href="{{ route('students.create') }}"&gt;Add New Student&lt;/a&gt;
+
+    &lt;table border="1" cellpadding="8" style="margin-top:10px;"&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;ID&lt;/th&gt;
+                &lt;th&gt;Name&lt;/th&gt;
+                &lt;th&gt;Email&lt;/th&gt;
+                &lt;th&gt;Course&lt;/th&gt;
+                &lt;th&gt;Age&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @forelse ($students as $student)
+                &lt;tr&gt;
+                    &lt;td&gt;{{ $student-&gt;id }}&lt;/td&gt;
+                    &lt;td&gt;{{ $student-&gt;name }}&lt;/td&gt;
+                    &lt;td&gt;{{ $student-&gt;email }}&lt;/td&gt;
+                    &lt;td&gt;{{ $student-&gt;course }}&lt;/td&gt;
+                    &lt;td&gt;{{ $student-&gt;age }}&lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;a href="{{ route('students.edit', $student) }}"&gt;Edit&lt;/a&gt;
+                        
+                        &lt;!-- Delete Form --&gt;
+                        &lt;form method="POST" action="{{ route('students.destroy', $student) }}" style="display:inline;"&gt;
+                            @csrf
+                            @method('DELETE')
+                            &lt;button type="submit" onclick="return confirm('Delete this record?')"&gt;Delete&lt;/button&gt;
+                        &lt;/form&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            @empty
+                &lt;tr&gt;&lt;td colspan="6"&gt;No students found.&lt;/td&gt;&lt;/tr&gt;
+            @endforelse
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+
+    &lt;!-- Pagination Links --&gt;
+    {{ $students-&gt;links() }}
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+            <h4>B. Create Form View (<code>resources/views/students/create.blade.php</code>)</h4>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Add New Student&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+    &lt;h2&gt;Add New Student&lt;/h2&gt;
+
+    &lt;form method="POST" action="{{ route('students.store') }}"&gt;
+        @csrf
+
+        &lt;div&gt;
+            &lt;label&gt;Name:&lt;/label&gt;&lt;br&gt;
+            &lt;input type="text" name="name" value="{{ old('name') }}"&gt;
+            @error('name') &lt;span style="color:red"&gt;{{ $message }}&lt;/span&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;div&gt;
+            &lt;label&gt;Email:&lt;/label&gt;&lt;br&gt;
+            &lt;input type="email" name="email" value="{{ old('email') }}"&gt;
+            @error('email') &lt;span style="color:red"&gt;{{ $message }}&lt;/span&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;div&gt;
+            &lt;label&gt;Course:&lt;/label&gt;&lt;br&gt;
+            &lt;select name="course"&gt;
+                &lt;option value=""&gt;-- Select --&lt;/option&gt;
+                &lt;option value="BCA" {{ old('course') == 'BCA' ? 'selected' : '' }}&gt;BCA&lt;/option&gt;
+                &lt;option value="MCA" {{ old('course') == 'MCA' ? 'selected' : '' }}&gt;MCA&lt;/option&gt;
+                &lt;option value="BBA" {{ old('course') == 'BBA' ? 'selected' : '' }}&gt;BBA&lt;/option&gt;
+            &lt;/select&gt;
+            @error('course') &lt;span style="color:red"&gt;{{ $message }}&lt;/span&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;div&gt;
+            &lt;label&gt;Age:&lt;/label&gt;&lt;br&gt;
+            &lt;input type="number" name="age" value="{{ old('age') }}"&gt;
+            @error('age') &lt;span style="color:red"&gt;{{ $message }}&lt;/span&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;button type="submit" style="margin-top:10px;"&gt;Save Student&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+            <h4>C. Edit Form View (<code>resources/views/students/edit.blade.php</code>)</h4>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Edit Student&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+    &lt;h2&gt;Edit Student&lt;/h2&gt;
+
+    &lt;form method="POST" action="{{ route('students.update', $student) }}"&gt;
+        @csrf
+        @method('PUT') &lt;!-- Spoofs PUT Request --&gt;
+
+        &lt;div&gt;
+            &lt;label&gt;Name:&lt;/label&gt;&lt;br&gt;
+            &lt;input type="text" name="name" value="{{ old('name', $student-&gt;name) }}"&gt;
+            @error('name') &lt;span style="color:red"&gt;{{ $message }}&lt;/span&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;div&gt;
+            &lt;label&gt;Email:&lt;/label&gt;&lt;br&gt;
+            &lt;input type="email" name="email" value="{{ old('email', $student-&gt;email) }}"&gt;
+            @error('email') &lt;span style="color:red"&gt;{{ $message }}&lt;/span&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;div&gt;
+            &lt;label&gt;Course:&lt;/label&gt;&lt;br&gt;
+            &lt;select name="course"&gt;
+                &lt;option value="BCA" {{ old('course', $student-&gt;course) == 'BCA' ? 'selected' : '' }}&gt;BCA&lt;/option&gt;
+                &lt;option value="MCA" {{ old('course', $student-&gt;course) == 'MCA' ? 'selected' : '' }}&gt;MCA&lt;/option&gt;
+                &lt;option value="BBA" {{ old('course', $student-&gt;course) == 'BBA' ? 'selected' : '' }}&gt;BBA&lt;/option&gt;
+            &lt;/select&gt;
+        &lt;/div&gt;
+
+        &lt;div&gt;
+            &lt;label&gt;Age:&lt;/label&gt;&lt;br&gt;
+            &lt;input type="number" name="age" value="{{ old('age', $student-&gt;age) }}"&gt;
+            @error('age') &lt;span style="color:red"&gt;{{ $message }}&lt;/span&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;button type="submit" style="margin-top:10px;"&gt;Update Student&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+
+        <!-- Section 16 -->
+        <div class="card" id="sec-16">
+            <h2>16. Feature Usage Reference Matrix</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature Name</th>
+                        <th>Primary Practical Use Case</th>
+                        <th>Code Syntax / Command Snippet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>GET Form</strong></td><td>Fetching/filtering record datasets without modifying backend state.</td><td><code>&lt;form method="GET" action="/search"&gt;</code></td></tr>
+                    <tr><td><strong>POST Form</strong></td><td>Creating, updating, or modifying database records securely.</td><td><code>&lt;form method="POST" action="/store"&gt;</code></td></tr>
+                    <tr><td><strong><code>@csrf</code></strong></td><td>Securing forms against Cross-Site Request Forgery attacks.</td><td>Inside Blade form: <code>@csrf</code></td></tr>
+                    <tr><td><strong><code>old('field')</code></strong></td><td>Re-populating input values following validation errors.</td><td><code>value="{{ old('email') }}"</code></td></tr>
+                    <tr><td><strong>Validation</strong></td><td>Verifying user input prior to business processing or database storage.</td><td><code>$request->validate([...])</code></td></tr>
+                    <tr><td><strong>Flash Data</strong></td><td>Displaying one-time feedback alert messages after HTTP redirects.</td><td><code>redirect()->with('success', 'Saved!')</code></td></tr>
+                    <tr><td><strong><code>.env</code> File</strong></td><td>Storing environment credentials (DB passwords, app keys) securely.</td><td><code>DB_DATABASE=student_db</code></td></tr>
+                    <tr><td><strong>Migrations</strong></td><td>Programmatically creating and tracking database schema versions.</td><td><code>php artisan migrate</code></td></tr>
+                    <tr><td><strong>Eloquent Model</strong></td><td>Object-oriented representation of a database table.</td><td><code>class Student extends Model</code></td></tr>
+                    <tr><td><strong>Mass Assignment</strong></td><td>Direct insertion of validated key-value arrays into database.</td><td><code>protected $fillable = ['name'];</code></td></tr>
+                    <tr><td><strong><code>findOrFail()</code></strong></td><td>Finding record or automatically returning HTTP 404 response if absent.</td><td><code>Student::findOrFail($id)</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 17 -->
+        <div class="card" id="sec-17">
+            <h2>17. Essential Artisan CLI Reference</h2>
+
+            <div class="diagram">
+                             ESSENTIAL ARTISAN COMMANDS
+                             
+             CREATION                                 DATABASE
+  ┌─────────────────────────────┐         ┌─────────────────────────────┐
+  │ make:model Student -m       │         │ migrate                     │
+  │ make:controller ... --res   │         │ migrate:rollback            │
+  │ make:request StoreRequest   │         │ migrate:fresh --seed        │
+  └─────────────────────────────┘         └─────────────────────────────┘
+                                utility
+                      ┌──────────────────────────┐
+                      │ route:list               │
+                      │ config:clear             │
+                      │ tinker                   │
+                      └──────────────────────────┘
+            </div>
+
+            <ul>
+                <li><strong>Generate Model with Migration:</strong><br><code>php artisan make:model Student -m</code></li>
+                <li><strong>Generate Resource Controller:</strong><br><code>php artisan make:controller StudentController --resource</code></li>
+                <li><strong>Generate Form Request Class:</strong><br><code>php artisan make:request StoreStudentRequest</code></li>
+                <li><strong>Execute Pending Migrations:</strong><br><code>php artisan migrate</code></li>
+                <li><strong>Rollback Last Migration Batch:</strong><br><code>php artisan migrate:rollback</code></li>
+                <li><strong>Wipe Database and Re-execute All Migrations:</strong><br><code>php artisan migrate:fresh</code></li>
+                <li><strong>List All Registered Application Routes:</strong><br><code>php artisan route:list</code></li>
+                <li><strong>Clear Application Configuration Cache:</strong><br><code>php artisan config:clear</code></li>
+                <li><strong>Launch Interactive Laravel Command Shell:</strong><br><code>php artisan tinker</code></li>
+            </ul>
+        </div>
+
+        <!-- Section 18 -->
+        <div class="card" id="sec-18">
+            <h2>18. Security Best Practices</h2>
+            <ol>
+                <li><strong>CSRF Inclusion:</strong> Ensure <code>@csrf</code> is included in all Blade web forms executing state-changing POST, PUT, or DELETE calls.</li>
+                <li><strong>Strict Validation:</strong> Validate all incoming HTTP request fields on the backend regardless of frontend restrictions.</li>
+                <li><strong>Mass-Assignment Guard:</strong> Explicitly declare <code>$fillable</code> array properties on Eloquent Models to block malicious request injections.</li>
+                <li><strong>XSS Escaping:</strong> Output dynamic string content in Blade templates using standard <code>{{ $variable }}</code> syntax to ensure automatic HTML escaping.</li>
+                <li><strong>Credential Isolation:</strong> Never hardcode passwords or production DB credentials in source code. Keep credentials in <code>.env</code> files.</li>
+                <li><strong>SQL Injection Prevention:</strong> Avoid concatenated raw SQL strings. Use Eloquent or Parameter Binding in Query Builder methods.</li>
+            </ol>
+        </div>
+
+        <!-- Section 19 -->
+        <div class="card" id="sec-19">
+            <h2>19. Exam-Oriented Practice Questions</h2>
+
+            <h3>2-Mark Short Questions</h3>
+
+            <h4>Q1: What is CSRF in Laravel?</h4>
+            <p><strong>Answer:</strong> CSRF stands for <strong>Cross-Site Request Forgery</strong>. It is an attack where unauthorized requests are executed on behalf of an authenticated user. Laravel prevents this by validating cryptographic token values passed via <code>@csrf</code> in forms.</p>
+
+            <h4>Q2: What is a Database Migration?</h4>
+            <p><strong>Answer:</strong> A migration is a version-controlled PHP script that programmatically builds, alters, or drops database tables without running manual raw SQL commands.</p>
+
+            <h4>Q3: What is Eloquent ORM?</h4>
+            <p><strong>Answer:</strong> Eloquent is Laravel's Object-Relational Mapper that maps database tables to PHP Model classes, enabling developers to interact with database records using object-oriented syntax.</p>
+
+            <h4>Q4: What is the purpose of <code>@csrf</code> directive?</h4>
+            <p><strong>Answer:</strong> The <code>@csrf</code> directive renders a hidden HTML form input field containing the user's active session security token, required to pass Laravel's CSRF verification middleware.</p>
+
+            <h4>Q5: What is Flash Data?</h4>
+            <p><strong>Answer:</strong> Flash data is temporary session data stored exclusively for the immediate next HTTP request, typically used for success or error feedback messages.</p>
+
+            <h4>Q6: What is the difference between <code>find()</code> and <code>findOrFail()</code>?</h4>
+            <p><strong>Answer:</strong> <code>find($id)</code> returns the matching record or <code>null</code> if absent. <code>findOrFail($id)</code> returns the matching record or throws a <code>ModelNotFoundException</code> which renders an automatic <strong>404 Not Found</strong> response.</p>
+
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 30px 0;">
+
+            <h3>5-Mark Questions</h3>
+
+            <h4>Q1: Explain GET and POST form handling in Laravel with code examples.</h4>
+            <p><strong>Answer:</strong></p>
+            <ul>
+                <li><strong>GET Form Handling:</strong> Used for retrieving, searching, or filtering data without modifying backend state. Data is visible in the URL query string.
+<pre><code>// Web Route
+Route::get('/search', function (Request $request) {
+    return $request->query('q'); // Accesses ?q=value
+});</code></pre>
+                </li>
+                <li><strong>POST Form Handling:</strong> Used for submitting, creating, or altering database records securely. Data is passed within the request body. Requires <code>@csrf</code> token directive.
+<pre><code>// Web Route
+Route::post('/store', function (Request $request) {
+    return $request->input('name'); // Accesses POST form field
+});</code></pre>
+                </li>
+            </ul>
+
+            <h4>Q2: Explain Laravel Form Validation and Custom Messages.</h4>
+            <p><strong>Answer:</strong> Validation checks whether incoming request inputs meet defined structural rules before running controller logic. If validation fails, Laravel automatically redirects back with error messages and old input.</p>
+
+<pre><code>$messages = [
+    'email.required' => 'Email address is mandatory.',
+    'email.unique'   => 'This email is already registered.',
+];
+
+$validated = $request->validate([
+    'name'  => 'required|string|max:100',
+    'email' => 'required|email|unique:students,email',
+], $messages);</code></pre>
+
+            <h4>Q3: Explain Eloquent ORM CRUD Operations with Examples.</h4>
+            <p><strong>Answer:</strong></p>
+<pre><code>use App\Models\Student;
+
+// 1. CREATE
+$student = Student::create(['name' => 'Rahul', 'email' => 'r@ex.com', 'course' => 'BCA']);
+
+// 2. READ
+$students = Student::all(); // Get all
+$single = Student::findOrFail(1); // Get by ID
+
+// 3. UPDATE
+$student = Student::findOrFail(1);
+$student->update(['name' => 'Rahul Sharma']);
+
+// 4. DELETE
+$student = Student::findOrFail(1);
+$student->delete();</code></pre>
+
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 30px 0;">
+
+            <h3>10-Mark Comprehensive Question</h3>
+
+            <h4>Q: Develop a complete Laravel Student Form application demonstrating CSRF protection, Validation, Old Input, Error Messages, Migrations, Models, and CRUD Controller logic.</h4>
+
+            <p><strong>Answer Summary Roadmap for Exam Paper Writing:</strong></p>
+            <ol>
+                <li><strong>Define Architecture:</strong> Detail the flow between Route (<code>routes/web.php</code>), Controller (<code>StudentController</code>), Model (<code>Student</code>), Migration, and Blade views (<code>index</code>, <code>create</code>, <code>edit</code>).</li>
+                <li><strong>Provide Migration Script:</strong> Show <code>Schema::create('students', ...)</code> table definition containing <code>id</code>, <code>name</code>, <code>email</code>, <code>course</code>, <code>age</code>, and <code>timestamps()</code>.</li>
+                <li><strong>Provide Eloquent Model:</strong> Show model declaration with <code>protected $fillable = ['name', 'email', 'course', 'age'];</code>.</li>
+                <li><strong>Provide Controller Code:</strong> Provide <code>index()</code>, <code>create()</code>, 0<code>store()</code>, <code>edit()</code>, <code>update()</code>, and <code>destroy()</code> implementations featuring <code>$request->validate()</code>.</li>
+                <li><strong>Provide Blade Forms:</strong> Draw out full Blade template code containing <code>@csrf</code>, <code>@method('PUT')</code>, <code>@method('DELETE')</code>, <code>old('field')</code>, <code>@error('field')</code>, and <code>session('success')</code>.</li>
+            </ol>
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Module 4: Request Handling, Form Processing, and Eloquent ORM &bull; Comprehensive Student Manual</p>
+        </div>
+    </footer>
+
+</body>
+</html>

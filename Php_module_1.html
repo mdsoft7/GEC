@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHP Foundations — Course Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EC;
+    --paper-panel:#FFFFFF;
+    --ink:#232323;
+    --ink-soft:#5B5A54;
+    --indigo:#2E3A5C;
+    --gold:#B9862E;
+    --sage:#4C6B54;
+    --rust:#A3492E;
+    --code-bg:#1D2333;
+    --code-ink:#E8E6DD;
+    --code-accent:#F2C879;
+    --code-string:#9FD8A0;
+    --code-comment:#7C8AAE;
+    --line:#E1DACB;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important;}
+  }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.65;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces',serif;
+    color:var(--indigo);
+    line-height:1.15;
+    margin:0 0 .4em 0;
+  }
+  a{color:var(--rust);}
+  code, pre, .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:var(--indigo);
+    color:#EDE7D6;
+    padding:70px 8vw 56px;
+    position:relative;
+    overflow:hidden;
+    border-bottom:6px solid var(--gold);
+  }
+  .hero .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.8rem;
+    color:var(--code-accent);
+    letter-spacing:.02em;
+    margin-bottom:14px;
+  }
+  .hero h1{
+    color:#FBF8EF;
+    font-size:clamp(2.2rem,5vw,3.6rem);
+    font-weight:700;
+    max-width:14ch;
+  }
+  .hero p.lede{
+    max-width:56ch;
+    font-size:1.1rem;
+    color:#C9CFE0;
+    margin-top:14px;
+  }
+  .hero .php-tag{
+    position:absolute;
+    right:6vw; top:50%; transform:translateY(-50%);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11rem;
+    color:rgba(255,255,255,.05);
+    font-weight:700;
+    pointer-events:none;
+    user-select:none;
+    animation:heroBlink 4.5s ease-in-out infinite;
+  }
+  @keyframes heroBlink{0%,100%{opacity:.9;}50%{opacity:.4;}}
+  .hero-meta{
+    margin-top:28px;
+    display:flex; gap:28px; flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.82rem;
+    color:#9FA8C4;
+  }
+  .hero-meta strong{color:#EDE7D6;}
+
+  /* ---------- Layout ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    max-width:1280px;
+    margin:0 auto;
+    gap:0;
+  }
+  nav.toc{
+    position:sticky; top:0; align-self:start;
+    height:100vh;
+    overflow-y:auto;
+    padding:36px 22px 40px 8vw;
+    border-right:1px solid var(--line);
+  }
+  nav.toc .toc-title{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+  }
+  nav.toc ol{list-style:none; margin:0; padding:0; counter-reset:module;}
+  nav.toc > ol > li{counter-increment:module; margin-bottom:16px;}
+  nav.toc > ol > li > a{
+    display:flex; gap:10px;
+    font-weight:600; font-size:.92rem;
+    color:var(--indigo); text-decoration:none;
+    cursor:pointer;
+  }
+  nav.toc > ol > li > a::before{
+    content:counter(module,decimal-leading-zero);
+    font-family:'JetBrains Mono',monospace;
+    color:var(--gold);
+    font-weight:600;
+  }
+  nav.toc ul{list-style:none; margin:6px 0 0 22px; padding:0; border-left:1px solid var(--line);}
+  nav.toc ul li{margin:4px 0;}
+  nav.toc ul li a{
+    font-size:.83rem; color:var(--ink-soft); text-decoration:none;
+    padding-left:12px; display:block; cursor:pointer;
+  }
+  nav.toc ul li a:hover, nav.toc>ol>li>a:hover{color:var(--rust);}
+  nav.toc a.active{color:var(--rust); font-weight:600;}
+
+  main{padding:10px 6vw 100px 48px; max-width:900px;}
+
+  .module{
+    padding-top:64px; margin-top:-20px;
+    scroll-margin-top:20px;
+  }
+  .topic{scroll-margin-top:20px;}
+  .module-head{
+    display:flex; align-items:baseline; gap:16px;
+    border-bottom:2px solid var(--indigo);
+    padding-bottom:10px; margin-bottom:28px;
+  }
+  .module-num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:1rem; color:var(--gold); font-weight:600;
+  }
+  .module-head h2{font-size:1.9rem; margin:0;}
+
+  .topic{margin:0 0 46px 0; padding-bottom:6px;}
+  .topic h3{font-size:1.28rem; margin-bottom:10px;}
+  .topic h4{font-size:1.02rem; color:var(--rust); margin:22px 0 8px;}
+  .topic p{margin:0 0 12px 0; color:var(--ink);}
+
+  .tag{
+    display:inline-block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem;
+    letter-spacing:.04em;
+    padding:3px 9px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .tag.def{background:#DDE3F0; color:var(--indigo);}
+  .tag.use{background:#E4EEE1; color:var(--sage);}
+  .tag.tip{background:#F6E7CF; color:var(--gold);}
+
+  .callout{
+    border-left:3px solid var(--sage);
+    background:var(--paper-panel);
+    padding:12px 18px;
+    margin:14px 0;
+    font-size:.95rem;
+  }
+  .callout.tip{border-left-color:var(--gold);}
+
+  pre.code{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    border-radius:var(--radius);
+    padding:0;
+    margin:10px 0 18px;
+    overflow-x:auto;
+    font-size:.87rem;
+    box-shadow:0 6px 18px rgba(29,35,51,.18);
+  }
+  pre.code .bar{
+    display:flex; align-items:center; gap:6px;
+    padding:8px 14px;
+    background:#161B29;
+    border-bottom:1px solid #2A3350;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    color:#8891B0;
+  }
+  pre.code .bar .dot{width:8px;height:8px;border-radius:50%;background:#3A4468;}
+  pre.code code{
+    display:block; padding:16px 18px; white-space:pre;
+    line-height:1.55;
+  }
+  .cm{color:var(--code-comment); font-style:italic;}
+  .kw{color:var(--code-accent);}
+  .st{color:var(--code-string);}
+  .fn{color:#8FC1E3;}
+  .vr{color:#E8A87C;}
+
+  table.ref{
+    width:100%; border-collapse:collapse; margin:14px 0 22px;
+    font-size:.88rem;
+  }
+  table.ref th, table.ref td{
+    border-bottom:1px solid var(--line);
+    text-align:left; padding:8px 10px; vertical-align:top;
+  }
+  table.ref th{
+    font-family:'JetBrains Mono',monospace; font-size:.72rem;
+    color:var(--ink-soft); font-weight:600; letter-spacing:.02em;
+  }
+  table.ref td.fnname{font-family:'JetBrains Mono',monospace; color:var(--rust); white-space:nowrap; font-weight:600;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+
+  .divider{
+    height:1px; background:var(--line); margin:56px 0;
+  }
+  .quiz-hint{
+    font-size:.85rem; color:var(--ink-soft);
+    border:1px dashed var(--line); padding:10px 14px; border-radius:var(--radius);
+    margin-top:8px;
+  }
+  footer{
+    text-align:center; padding:44px 6vw; color:var(--ink-soft); font-size:.85rem;
+    border-top:1px solid var(--line);
+  }
+  ::selection{background:#F6E7CF;}
+
+  /* ---------- Animated diagrams ---------- */
+  .viz{
+    background:var(--paper-panel); border:1px solid var(--line); border-radius:6px;
+    padding:26px 20px 20px; margin:16px 0 28px; min-height:130px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+  }
+  .viz-label{
+    position:absolute; top:10px; left:16px;
+    font-family:'JetBrains Mono',monospace; font-size:.68rem;
+    letter-spacing:.05em; color:var(--ink-soft);
+  }
+
+  /* flow: node -> arrow -> node (variables, functions) */
+  .flow{display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center;}
+  .flow .node{
+    padding:10px 16px; border:2px solid var(--indigo); border-radius:5px;
+    font-family:'JetBrains Mono',monospace; font-size:.82rem;
+    background:#fff; color:var(--indigo); white-space:nowrap;
+    animation:nodePulse 2.4s ease-in-out infinite;
+  }
+  .flow .node:nth-child(3){animation-delay:.5s;}
+  .flow .node:nth-child(5){animation-delay:1s;}
+  @keyframes nodePulse{0%,80%,100%{box-shadow:0 0 0 rgba(185,134,46,0);}40%{box-shadow:0 0 0 6px rgba(185,134,46,.18);}}
+  .flow .arrow{width:44px; height:16px; position:relative; flex:none;}
+  .flow .arrow::before{
+    content:""; position:absolute; top:7px; left:0; right:6px; height:2px; background:var(--line);
+  }
+  .flow .arrow::after{
+    content:""; position:absolute; top:3px; right:0; width:0; height:0;
+    border-top:5px solid transparent; border-bottom:5px solid transparent; border-left:7px solid var(--line);
+  }
+  .flow .dot{
+    position:absolute; top:2px; left:0; width:11px; height:11px; border-radius:50%;
+    background:var(--gold); animation:travel 2.4s linear infinite;
+  }
+  @keyframes travel{0%{left:0; opacity:0;}8%{opacity:1;}92%{opacity:1;}100%{left:38px; opacity:0;}}
+
+  /* spinner: orbiting dots (loops) */
+  .spinner{position:relative; width:110px; height:110px;}
+  .spinner .center-label{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--ink-soft); text-align:center;
+  }
+  .spinner .orb{
+    position:absolute; top:50%; left:50%; width:12px; height:12px; margin:-6px;
+    border-radius:50%; background:var(--sage);
+    animation:orbit 3s linear infinite;
+  }
+  .spinner .orb:nth-child(2){background:var(--gold); animation-delay:-1s;}
+  .spinner .orb:nth-child(3){background:var(--rust); animation-delay:-2s;}
+  @keyframes orbit{
+    from{transform:rotate(0deg) translateX(46px) rotate(0deg);}
+    to{transform:rotate(360deg) translateX(46px) rotate(-360deg);}
+  }
+
+  /* fork: alternating branches (control statements) */
+  .fork{width:260px; text-align:center;}
+  .fork .cond{
+    display:inline-block; padding:8px 14px; border:2px solid var(--indigo); border-radius:5px;
+    font-family:'JetBrains Mono',monospace; font-size:.78rem; background:#fff; color:var(--indigo);
+  }
+  .fork .branches{display:flex; justify-content:space-between; margin-top:26px; position:relative;}
+  .fork .branches::before{
+    content:""; position:absolute; top:-16px; left:50%; width:1px; height:16px; background:var(--line);
+  }
+  .fork .branch{
+    padding:8px 12px; border-radius:5px; font-family:'JetBrains Mono',monospace; font-size:.74rem;
+    border:2px solid var(--line); color:var(--ink-soft); background:#fff;
+    animation:branchGlow 4s ease-in-out infinite;
+  }
+  .fork .branch.false{animation-delay:2s;}
+  @keyframes branchGlow{
+    0%,45%,100%{border-color:var(--line); color:var(--ink-soft); background:#fff;}
+    20%{border-color:var(--sage); color:var(--sage); background:#EEF3EC;}
+  }
+
+  /* nested: global / local scope boxes */
+  .nested{position:relative; width:230px; height:140px;}
+  .nested .outer{
+    position:absolute; inset:0; border:2px dashed var(--indigo); border-radius:8px;
+    animation:outerPulse 5s ease-in-out infinite;
+  }
+  .nested .outer-label{position:absolute; top:6px; left:10px; font-family:'JetBrains Mono',monospace; font-size:.64rem; color:var(--indigo);}
+  .nested .inner{
+    position:absolute; inset:34px 20px 20px; border:2px solid var(--gold); border-radius:6px; background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    animation:innerPulse 2.6s ease-in-out infinite;
+  }
+  .nested .inner span{font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--gold);}
+  @keyframes outerPulse{0%,100%{border-color:var(--indigo);}50%{border-color:#8894BE;}}
+  @keyframes innerPulse{0%,100%{box-shadow:0 0 0 rgba(185,134,46,0);}50%{box-shadow:0 0 0 8px rgba(185,134,46,.15);}}
+
+  /* cells: array boxes / string letters */
+  .cells{display:flex; gap:6px; align-items:center;}
+  .cell{
+    width:42px; height:42px; display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--indigo); border-radius:5px; font-family:'JetBrains Mono',monospace;
+    font-weight:600; background:#fff; color:var(--indigo); position:relative; font-size:.85rem;
+  }
+  .cell .idx{
+    position:absolute; bottom:-20px; font-size:.6rem; color:var(--ink-soft); font-weight:400;
+  }
+  .cells.append .cell:last-child{
+    animation:appendCell 3.2s ease-in-out infinite;
+  }
+  @keyframes appendCell{
+    0%,15%{opacity:0; transform:translateX(16px) scale(.6);}
+    30%,70%{opacity:1; transform:translateX(0) scale(1);}
+    85%,100%{opacity:0; transform:translateX(16px) scale(.6);}
+  }
+  .cells.flip{animation:flipRow 4s ease-in-out infinite;}
+  .cells.flip .cell span{display:inline-block; animation:flipLetter 4s ease-in-out infinite;}
+  @keyframes flipRow{0%,40%,100%{transform:scaleX(1);}70%{transform:scaleX(-1);}}
+  @keyframes flipLetter{0%,40%,100%{transform:scaleX(1);}70%{transform:scaleX(-1);}}
+
+
+  /* ---------- Practice Q&A ---------- */
+  .practice-head{
+    font-family:'JetBrains Mono',monospace; font-size:.72rem; letter-spacing:.05em;
+    color:var(--sage); margin:6px 0 10px; text-transform:none;
+  }
+  details.qa{
+    border:1px solid var(--line); border-radius:5px; margin-bottom:10px;
+    background:var(--paper-panel); overflow:hidden;
+  }
+  details.qa summary{
+    padding:11px 14px; cursor:pointer; font-weight:600; color:var(--indigo);
+    list-style:none; display:flex; gap:10px; align-items:flex-start; font-size:.94rem;
+  }
+  details.qa summary::-webkit-details-marker{display:none;}
+  details.qa summary::before{
+    content:"Q"; font-family:'JetBrains Mono',monospace; background:var(--gold); color:#fff;
+    width:20px; height:20px; border-radius:50%; flex:none; display:flex; align-items:center;
+    justify-content:center; font-size:.68rem; margin-top:1px;
+  }
+  details.qa[open] summary{border-bottom:1px solid var(--line);}
+  details.qa .answer{
+    padding:12px 14px 14px 44px; font-size:.92rem; color:var(--ink); background:#FBF9F4;
+  }
+  details.qa .answer .lbl{
+    display:block; font-family:'JetBrains Mono',monospace; font-size:.65rem;
+    letter-spacing:.05em; color:var(--sage); margin-bottom:5px;
+  }
+
+  /* ---------- Assessment quiz ---------- */
+  .quiz-block{
+    border:1px solid var(--line); border-radius:6px; padding:16px 18px 18px;
+    margin-bottom:16px; background:var(--paper-panel);
+  }
+  .quiz-block p.q{font-weight:600; margin:0 0 10px; color:var(--indigo);}
+  .quiz-block .opt{
+    display:block; padding:8px 12px; border:1px solid var(--line); border-radius:4px;
+    margin-bottom:7px; cursor:pointer; font-size:.92rem; transition:border-color .15s;
+  }
+  .quiz-block .opt:hover{border-color:var(--gold);}
+  .quiz-block .opt input{margin-right:8px;}
+  .quiz-block .opt.correct{border-color:var(--sage); background:#EEF3EC;}
+  .quiz-block .opt.incorrect{border-color:var(--rust); background:#F7EAE5;}
+  .quiz-block .explain{
+    font-size:.85rem; color:var(--ink-soft); margin-top:8px; display:none; padding-top:8px;
+    border-top:1px dashed var(--line);
+  }
+  .quiz-block.answered .explain{display:block;}
+  #checkScoreBtn{
+    font-family:'JetBrains Mono',monospace; font-size:.85rem; font-weight:600;
+    background:var(--indigo); color:#fff; border:none; padding:12px 22px; border-radius:5px;
+    cursor:pointer; letter-spacing:.02em;
+  }
+  #checkScoreBtn:hover{background:#232D48;}
+  #scoreBox{
+    margin-top:18px; padding:14px 18px; border-radius:6px; background:#EEF3EC;
+    border:1px solid var(--sage); font-family:'JetBrains Mono',monospace; font-size:.95rem;
+    color:var(--sage); display:none;
+  }
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;}
+    nav.toc{position:static; height:auto; border-right:none; border-bottom:1px solid var(--line); padding:24px 6vw;}
+    main{padding:10px 6vw 80px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="php-tag">&lt;?php</div>
+  <div class="eyebrow">Trainer notes · GEC Gandhi Institute of Technology</div>
+  <h1>PHP Foundations</h1>
+  <p class="lede">A hands-on walkthrough of core PHP — from your first <code>echo</code> to arrays and string handling — written so you can read it once and teach from it forever.</p>
+  <div class="hero-meta">
+    <span><strong>7 modules</strong> · basics to strings</span>
+    <span><strong>60+</strong> runnable code snippets</span>
+    <span><strong>Level:</strong> beginner → intermediate</span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc" id="toc">
+  <div class="toc-title">CONTENTS</div>
+  <ol>
+    <li><a href="#m1">PHP Basics</a>
+      <ul>
+        <li><a href="#intro">Introduction to PHP</a></li>
+        <li><a href="#tools">Tools &amp; Setup</a></li>
+        <li><a href="#syntax">PHP Syntax</a></li>
+        <li><a href="#comments">Comments</a></li>
+        <li><a href="#vars">Variables &amp; Constants</a></li>
+        <li><a href="#types">Data Types</a></li>
+        <li><a href="#ops">Operators</a></li>
+        <li><a href="#echoprint">Echo vs Print</a></li>
+      </ul>
+    </li>
+    <li><a href="#m2">Control Statements</a>
+      <ul>
+        <li><a href="#if">if / if-else</a></li>
+        <li><a href="#elseif">if-elseif-else</a></li>
+        <li><a href="#switch">switch</a></li>
+      </ul>
+    </li>
+    <li><a href="#m3">Loops</a>
+      <ul>
+        <li><a href="#for">for</a></li>
+        <li><a href="#while">while</a></li>
+        <li><a href="#dowhile">do…while</a></li>
+        <li><a href="#foreach">foreach</a></li>
+        <li><a href="#breakcontinue">break &amp; continue</a></li>
+      </ul>
+    </li>
+    <li><a href="#m4">Functions</a>
+      <ul>
+        <li><a href="#funcbasics">Defining &amp; Calling</a></li>
+        <li><a href="#params">Parameters &amp; Return</a></li>
+        <li><a href="#defargs">Default &amp; Variadic Args</a></li>
+      </ul>
+    </li>
+    <li><a href="#m5">Variable Scope</a>
+      <ul>
+        <li><a href="#scope">Global, Local, Static</a></li>
+      </ul>
+    </li>
+    <li><a href="#m6">Arrays</a>
+      <ul>
+        <li><a href="#anatomy">Anatomy of an Array</a></li>
+        <li><a href="#indexed">Indexed Arrays</a></li>
+        <li><a href="#assoc">Associative Arrays</a></li>
+        <li><a href="#arrfuncs">Array Functions</a></li>
+      </ul>
+    </li>
+    <li><a href="#m7">Strings</a>
+      <ul>
+        <li><a href="#strformat">Formatting Strings</a></li>
+        <li><a href="#strjoin">Joining &amp; Splitting</a></li>
+        <li><a href="#strcompare">Comparing Strings</a></li>
+        <li><a href="#strfuncs">String Functions</a></li>
+      </ul>
+    </li>
+    <li><a href="#m8">Final Assessment</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ============ MODULE 1 ============ -->
+<section class="module" id="m1">
+  <div class="module-head"><span class="module-num">01</span><h2>PHP Basics</h2></div>
+
+  <div class="topic" id="intro">
+    <h3>Introduction to PHP</h3>
+    <span class="tag def">Definition</span>
+    <p><strong>PHP</strong> (recursively short for <strong>P</strong>HP: <strong>H</strong>ypertext <strong>P</strong>reprocessor) is an open-source, server-side scripting language purpose-built for the web. "Server-side" means the code runs on the web server, not in the visitor's browser: PHP reads your script, executes the logic, pulls in any data it needs, and hands the browser only the finished HTML — the source code itself is never exposed. It was created in 1994 by Rasmus Lerdorf and has since grown into one of the most widely deployed web languages, powering everything from small college portals to platforms like WordPress and Facebook's early architecture.</p>
+    <div class="viz">
+      <span class="viz-label">request → server → response</span>
+      <div class="flow">
+        <div class="node">Browser<div class="dot"></div></div>
+        <div class="arrow"></div>
+        <div class="node">PHP + Server</div>
+        <div class="arrow"></div>
+        <div class="node">HTML page</div>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>Why it matters:</strong> PHP powers a huge share of the web because it embeds directly inside HTML, has a gentle learning curve for beginners, and has first-class support on almost every hosting provider without extra setup.
+    </div>
+    <span class="tag use">Use case</span>
+    <p>Generating a personalised page — e.g. showing "Welcome back, Priya" by pulling a logged-in user's name from a database and printing it into the HTML before the page ever reaches the browser.</p>
+  </div>
+
+  <div class="topic" id="tools">
+    <h3>Tools &amp; Software Requirements</h3>
+    <span class="tag def">Definition</span>
+    <p>Running PHP locally requires three cooperating pieces of software: a <strong>web server</strong> (commonly Apache or Nginx) that listens for browser requests, the <strong>PHP interpreter</strong> itself that executes your <code>.php</code> files, and usually a <strong>database engine</strong> (typically MySQL or MariaDB) for storing data. Rather than installing and configuring all three separately, most beginners use a bundled "stack" installer that wires them together automatically. A good code editor with PHP-aware autocomplete and error-checking rounds out the toolkit and saves hours of debugging.</p>
+    <table class="ref">
+      <tr><th>Tool</th><th>What it gives you</th></tr>
+      <tr><td class="fnname">XAMPP</td><td>Apache + PHP + MySQL + phpMyAdmin, cross-platform, beginner friendly</td></tr>
+      <tr><td class="fnname">Laragon</td><td>Lightweight Windows stack, fast to spin up, great for Laravel work</td></tr>
+      <tr><td class="fnname">VS Code</td><td>Editor of choice — add the "PHP Intelephense" extension for autocomplete</td></tr>
+      <tr><td class="fnname">Composer</td><td>PHP's own package/dependency manager (needed for Laravel, PHPUnit, etc.)</td></tr>
+      <tr><td class="fnname">php -S</td><td>PHP's built-in server for quick testing, no Apache needed</td></tr>
+    </table>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>terminal</div><code><span class="cm"># start PHP's built-in dev server in the current folder</span>
+php -S localhost:8000</code></pre>
+    <span class="tag tip">Try it</span>
+    <p>Run <code>php -v</code> in a terminal. If it prints a version number, PHP is installed correctly and ready for the exercises below.</p>
+  </div>
+
+  <div class="topic" id="syntax">
+    <h3>PHP Syntax</h3>
+    <span class="tag def">Definition</span>
+    <p>A PHP script is marked off from surrounding HTML using the opening tag <code>&lt;?php</code> and, optionally, a closing tag <code>?&gt;</code>. Everything between these tags is interpreted as PHP; everything outside them is sent straight through as plain HTML. Every individual instruction, called a <strong>statement</strong>, must end with a semicolon <code>;</code> so the interpreter knows where one instruction stops and the next begins. Because PHP can be dropped into an HTML file at any point, a single file can freely alternate between static markup and dynamic logic.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>hello.php</div><code><span class="kw">&lt;?php</span>
+<span class="fn">echo</span> <span class="st">"Hello, students!"</span>;
+<span class="kw">?&gt;</span></code></pre>
+    <p>Mixing PHP with HTML — this is the pattern you'll use most while templating pages:</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>greeting.php</div><code>&lt;h1&gt;
+  <span class="kw">&lt;?php</span> <span class="fn">echo</span> <span class="st">"Welcome, "</span> . $studentName; <span class="kw">?&gt;</span>
+&lt;/h1&gt;</code></pre>
+    <span class="tag use">Use case</span>
+    <p>A single <code>.php</code> file can serve a full HTML page where only a few words (a name, a price, a date) change per request, instead of maintaining a separate static file per visitor.</p>
+  </div>
+
+  <div class="topic" id="comments">
+    <h3>Comments in PHP</h3>
+    <span class="tag def">Definition</span>
+    <p>A comment is a piece of text in your source file that the PHP interpreter deliberately skips over — it produces no output and has no effect on the program. Comments exist purely for human readers: they explain intent, flag tricky logic, or temporarily disable a line of code without deleting it. PHP supports three comment styles, borrowed from C, C++ and shell scripting respectively, and all three can be mixed freely in the same file.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>comments.php</div><code><span class="kw">&lt;?php</span>
+<span class="cm">// single-line comment</span>
+<span class="cm"># also a single-line comment (shell-style)</span>
+
+<span class="cm">/*
+  multi-line comment —
+  good for explaining a whole block
+*/</span>
+<span class="fn">echo</span> <span class="st">"Comments don't print anything"</span>;</code></pre>
+    <span class="tag tip">Try it</span>
+    <p>Explain <em>why</em> code does something in comments, not <em>what</em> it does — the code itself already shows the "what", so a good comment adds information the code alone can't.</p>
+  </div>
+
+  <div class="topic" id="vars">
+    <h3>Variables &amp; Constants</h3>
+    <span class="tag def">Definition</span>
+    <p>A <strong>variable</strong> is a named container for a value that can change while the script runs; in PHP every variable name starts with a dollar sign <code>$</code> and needs no upfront type declaration — PHP figures the type out from the value you assign. A <strong>constant</strong>, created with <code>define()</code> or the <code>const</code> keyword, is the opposite: once set, its value is locked for the rest of the script and any attempt to change it is ignored or triggers an error. Constants don't use the <code>$</code> prefix, and by convention are written in <code>UPPER_SNAKE_CASE</code> so they stand out from ordinary variables at a glance.</p>
+    <div class="viz">
+      <span class="viz-label">assignment</span>
+      <div class="flow">
+        <div class="node">"Ravi"<div class="dot"></div></div>
+        <div class="arrow"></div>
+        <div class="node">$studentName</div>
+        <div class="arrow"></div>
+        <div class="node">ready to reuse</div>
+      </div>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>variables.php</div><code><span class="kw">&lt;?php</span>
+$studentName = <span class="st">"Ravi"</span>;      <span class="cm">// variable</span>
+$age         = 21;
+$gpa         = 8.7;
+
+<span class="fn">define</span>(<span class="st">"COLLEGE_NAME"</span>, <span class="st">"GEC Gandhi Institute of Technology"</span>);
+<span class="kw">const</span> MAX_MARKS = 100;   <span class="cm">// constant, class/global scope</span>
+
+<span class="fn">echo</span> $studentName . <span class="st">" studies at "</span> . COLLEGE_NAME;</code></pre>
+    <div class="callout">
+      <strong>Naming rules:</strong> variable names must start with a letter or underscore, are case-sensitive (<code>$Age</code> ≠ <code>$age</code>), and cannot contain spaces.
+    </div>
+    <span class="tag use">Use case</span>
+    <p>Use a constant for values that must never be edited by mistake — an API key, a tax rate, or a fixed maximum-marks value that every part of the program should agree on.</p>
+  </div>
+
+  <div class="topic" id="types">
+    <h3>Data Types</h3>
+    <span class="tag def">Definition</span>
+    <p>A <strong>data type</strong> describes the kind of value a variable holds and, in turn, what you're allowed to do with it — you can add two numbers but not two arrays. PHP is a <strong>loosely (dynamically) typed</strong> language: you never declare a type up front, the interpreter infers it from the value assigned, and the very same variable can hold a string at one moment and an integer the next. This flexibility is convenient for quick scripts, but it also means it's worth checking a variable's type with functions like <code>gettype()</code> when its origin (like user input) isn't certain.</p>
+    <table class="ref">
+      <tr><th>Type</th><th>Example</th><th>Notes</th></tr>
+      <tr><td class="fnname">string</td><td><code>"Kolkata"</code></td><td>Text, single or double quotes</td></tr>
+      <tr><td class="fnname">int</td><td><code>42</code></td><td>Whole numbers</td></tr>
+      <tr><td class="fnname">float</td><td><code>3.14</code></td><td>Decimal numbers</td></tr>
+      <tr><td class="fnname">bool</td><td><code>true</code> / <code>false</code></td><td>Used in conditions</td></tr>
+      <tr><td class="fnname">array</td><td><code>[1,2,3]</code></td><td>Ordered map of values</td></tr>
+      <tr><td class="fnname">object</td><td><code>new Student()</code></td><td>Instance of a class</td></tr>
+      <tr><td class="fnname">NULL</td><td><code>null</code></td><td>"No value" — an intentional empty state</td></tr>
+    </table>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>types.php</div><code><span class="kw">&lt;?php</span>
+$name    = <span class="st">"MD Habib"</span>;      <span class="cm">// string</span>
+$year    = 2026;             <span class="cm">// int</span>
+$cgpa    = 8.4;               <span class="cm">// float</span>
+$passed  = <span class="kw">true</span>;             <span class="cm">// bool</span>
+$marks   = [90, 85, 76];       <span class="cm">// array</span>
+$remarks = <span class="kw">null</span>;             <span class="cm">// NULL</span>
+
+<span class="fn">echo</span> <span class="fn">gettype</span>($cgpa);  <span class="cm">// "double" (PHP's internal name for float)</span>
+<span class="fn">var_dump</span>($passed);   <span class="cm">// bool(true)</span></code></pre>
+  </div>
+
+  <div class="topic" id="ops">
+    <h3>Operators</h3>
+    <span class="tag def">Definition</span>
+    <p>An <strong>operator</strong> is a symbol that performs an operation on one or more values, called <strong>operands</strong>. PHP groups them into families: arithmetic operators do maths, comparison operators test a relationship between two values and produce a boolean, logical operators combine boolean expressions, and assignment operators store or update a variable's value. Knowing the difference between <code>==</code> (loose equality, which converts types before comparing) and <code>===</code> (strict equality, which also requires matching types) is one of the most important early lessons in PHP, since it quietly causes a lot of beginner bugs.</p>
+    <div class="grid2">
+      <table class="ref">
+        <tr><th>Arithmetic</th><th></th></tr>
+        <tr><td class="fnname">+ - * /</td><td>add, subtract, multiply, divide</td></tr>
+        <tr><td class="fnname">%</td><td>modulus (remainder)</td></tr>
+        <tr><td class="fnname">**</td><td>exponent (power)</td></tr>
+      </table>
+      <table class="ref">
+        <tr><th>Comparison</th><th></th></tr>
+        <tr><td class="fnname">== / !=</td><td>equal / not equal (loose)</td></tr>
+        <tr><td class="fnname">=== / !==</td><td>equal / not equal (strict — checks type too)</td></tr>
+        <tr><td class="fnname">&gt; &lt; &gt;= &lt;=</td><td>greater/less than (or equal)</td></tr>
+      </table>
+      <table class="ref">
+        <tr><th>Logical</th><th></th></tr>
+        <tr><td class="fnname">&amp;&amp; / and</td><td>true if both sides are true</td></tr>
+        <tr><td class="fnname">|| / or</td><td>true if either side is true</td></tr>
+        <tr><td class="fnname">!</td><td>negates a boolean</td></tr>
+      </table>
+      <table class="ref">
+        <tr><th>Assignment</th><th></th></tr>
+        <tr><td class="fnname">=</td><td>assign value</td></tr>
+        <tr><td class="fnname">+= -= *= /=</td><td>shorthand: <code>$x += 1</code> is <code>$x = $x + 1</code></td></tr>
+        <tr><td class="fnname">.=</td><td>append to a string</td></tr>
+      </table>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>operators.php</div><code><span class="kw">&lt;?php</span>
+$marks = 78;
+$attendance = 92;
+
+<span class="fn">var_dump</span>($marks == <span class="st">"78"</span>);   <span class="cm">// true  (loose: values match)</span>
+<span class="fn">var_dump</span>($marks === <span class="st">"78"</span>);  <span class="cm">// false (strict: int vs string)</span>
+
+$eligible = ($marks &gt;= 40 &amp;&amp; $attendance &gt;= 75);
+<span class="fn">echo</span> $eligible ? <span class="st">"Eligible"</span> : <span class="st">"Not eligible"</span>; <span class="cm">// ternary operator</span></code></pre>
+  </div>
+
+  <div class="topic" id="echoprint">
+    <h3>Echo vs Print</h3>
+    <span class="tag def">Definition</span>
+    <p><code>echo</code> and <code>print</code> are PHP's two built-in language constructs for sending text to the output (typically the browser). They behave almost identically for simple cases, which is why beginners often use them interchangeably, but they differ in two technical ways: <code>echo</code> accepts several comma-separated arguments in one call and returns no value, while <code>print</code> accepts exactly one argument and always returns the integer <code>1</code>, which makes it usable inside a larger expression. Because <code>echo</code> skips the overhead of returning a value, it is marginally faster, though the difference is negligible in real applications.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>echo_print.php</div><code><span class="kw">&lt;?php</span>
+<span class="fn">echo</span> <span class="st">"Hello "</span>, <span class="st">"World"</span>, <span class="st">"!"</span>;   <span class="cm">// echo: multiple args, comma-separated</span>
+<span class="fn">print</span> <span class="st">"Hello World!"</span>;              <span class="cm">// print: single arg only</span>
+
+$ok = <span class="fn">print</span> <span class="st">"this returns 1"</span>;   <span class="cm">// $ok is now 1</span></code></pre>
+    <table class="ref">
+      <tr><th></th><th>echo</th><th>print</th></tr>
+      <tr><td class="fnname">Arguments</td><td>one or more, comma-separated</td><td>exactly one</td></tr>
+      <tr><td class="fnname">Return value</td><td>none</td><td>always <code>1</code></td></tr>
+      <tr><td class="fnname">Speed</td><td>marginally faster</td><td>marginally slower</td></tr>
+    </table>
+    <span class="tag tip">Try it</span>
+    <p>In practice, reach for <code>echo</code> by default — it's the more common convention in PHP codebases and frameworks like Laravel.</p>
+  </div>
+  <div class="topic" id="practice1">
+    <h3>Practice Questions — PHP Basics</h3>
+    <p class="practice-head">Try to answer before revealing — click a question to check yourself.</p>
+    <details class="qa">
+      <summary>What tag must every pure PHP statement be written inside?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>Every PHP statement must sit between the opening tag <code>&lt;?php</code> and, optionally, the closing tag <code>?&gt;</code>. Anything outside those tags is treated as plain HTML and printed as-is.</div>
+    </details>
+    <details class="qa">
+      <summary>Is <code>$Name</code> the same variable as <code>$name</code>? Why or why not?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>No. PHP variable names are case-sensitive, so <code>$Name</code> and <code>$name</code> are two completely separate variables, even though they look similar.</div>
+    </details>
+    <details class="qa">
+      <summary>What is the key difference between a variable and a constant?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>A variable (<code>$x</code>) can be reassigned a new value at any point in the script, while a constant (created with <code>define()</code> or <code>const</code>) is set once and cannot be changed afterwards.</div>
+    </details>
+    <details class="qa">
+      <summary>Why does <code>echo $marks === "78"</code> return <code>false</code> even when <code>$marks</code> is 78?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>Because <code>===</code> is a strict comparison — it checks both value <em>and</em> type. <code>$marks</code> is an <code>int</code> while <code>"78"</code> is a <code>string</code>, so even though the numbers look equal, the types don't match.</div>
+    </details>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ MODULE 2 ============ -->
+<section class="module" id="m2">
+  <div class="module-head"><span class="module-num">02</span><h2>Control Statements</h2></div>
+
+  <div class="topic" id="if">
+    <h3>if / if-else</h3>
+    <span class="tag def">Definition</span>
+    <p>The <code>if</code> statement is PHP's most basic decision-making tool: it evaluates a condition — any expression that resolves to <code>true</code> or <code>false</code> — and runs the code inside its curly braces only when that condition is <code>true</code>. Adding an <code>else</code> clause supplies a fallback block that runs whenever the condition turns out <code>false</code>, so exactly one of the two branches executes on any given run. Conditions are usually built from comparison operators (<code>&gt;=</code>, <code>==</code>, etc.) and can be combined with <code>&amp;&amp;</code> or <code>||</code> for more complex logic.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>if_else.php</div><code><span class="kw">&lt;?php</span>
+$marks = 38;
+
+<span class="kw">if</span> ($marks &gt;= 40) {
+    <span class="fn">echo</span> <span class="st">"Pass"</span>;
+} <span class="kw">else</span> {
+    <span class="fn">echo</span> <span class="st">"Fail — needs re-exam"</span>;
+}</code></pre>
+    <span class="tag use">Use case</span>
+    <p>Deciding whether to show a "Pass" or "Fail" badge next to each student's result on a results dashboard.</p>
+  </div>
+
+  <div class="topic" id="elseif">
+    <h3>if – else if – else</h3>
+    <span class="tag def">Definition</span>
+    <p>Real-world decisions often involve more than two outcomes, and that's what the <code>elseif</code> chain is for: PHP checks each condition strictly from top to bottom, runs the block belonging to the very first one that is <code>true</code>, and then skips every remaining <code>elseif</code>/<code>else</code> in the chain — even if a later condition would also have matched. Ordering therefore matters: put the most specific or highest-priority condition first, since it "wins" over broader conditions written below it.</p>
+    <div class="viz">
+      <span class="viz-label">first true branch wins</span>
+      <div class="fork">
+        <div class="cond">$marks &gt;= 75 ?</div>
+        <div class="branches">
+          <div class="branch true">"A" grade</div>
+          <div class="branch false">check next condition</div>
+        </div>
+      </div>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>grade.php</div><code><span class="kw">&lt;?php</span>
+$marks = 76;
+
+<span class="kw">if</span> ($marks &gt;= 90) {
+    $grade = <span class="st">"A+"</span>;
+} <span class="kw">elseif</span> ($marks &gt;= 75) {
+    $grade = <span class="st">"A"</span>;
+} <span class="kw">elseif</span> ($marks &gt;= 60) {
+    $grade = <span class="st">"B"</span>;
+} <span class="kw">else</span> {
+    $grade = <span class="st">"C"</span>;
+}
+<span class="fn">echo</span> <span class="st">"Grade: "</span> . $grade;   <span class="cm">// Grade: A</span></code></pre>
+  </div>
+
+  <div class="topic" id="switch">
+    <h3>switch statement</h3>
+    <span class="tag def">Definition</span>
+    <p>A <code>switch</code> statement compares a single value against a list of possible fixed cases and jumps straight to the matching one, making it a tidier alternative to a long <code>elseif</code> chain when you're testing one variable repeatedly. Each <code>case</code> must end with a <code>break</code> statement, or execution "falls through" and keeps running the code in the next case as well — a common source of beginner bugs. An optional <code>default</code> case catches any value that didn't match anything above it.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>switch.php</div><code><span class="kw">&lt;?php</span>
+$day = <span class="st">"Wed"</span>;
+
+<span class="kw">switch</span> ($day) {
+    <span class="kw">case</span> <span class="st">"Mon"</span>:
+        <span class="fn">echo</span> <span class="st">"PHP Basics class"</span>;
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="st">"Wed"</span>:
+        <span class="fn">echo</span> <span class="st">"Arrays &amp; Strings lab"</span>;
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="fn">echo</span> <span class="st">"No class scheduled"</span>;
+}
+<span class="cm">// Output: Arrays &amp; Strings lab</span></code></pre>
+    <span class="tag tip">Try it</span>
+    <p>Remove the <code>break;</code> after the <code>"Wed"</code> case and re-run — notice it now also prints the <code>default</code> message. That's "fall-through".</p>
+  </div>
+  <div class="topic" id="practice2">
+    <h3>Practice Questions — Control Statements</h3>
+    <details class="qa">
+      <summary>In an <code>if–elseif–else</code> chain, what happens once one condition matches?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>PHP runs that block's code and then skips every remaining <code>elseif</code>/<code>else</code> in the chain — only the first matching branch ever executes, even if a later condition would also be true.</div>
+    </details>
+    <details class="qa">
+      <summary>What is "fall-through" in a <code>switch</code> statement, and how do you prevent it?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>Fall-through happens when a <code>case</code> is missing its <code>break</code>, so execution keeps running into the next case's code instead of stopping. Adding a <code>break;</code> at the end of each case prevents it.</div>
+    </details>
+    <details class="qa">
+      <summary>Rewrite this as an if-else: <code>switch($x){case 1: echo "one"; break; default: echo "other";}</code></summary>
+      <div class="answer"><span class="lbl">ANSWER</span><code>if ($x == 1) { echo "one"; } else { echo "other"; }</code> — a two-branch switch is functionally identical to a simple if-else.</div>
+    </details>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ MODULE 3 ============ -->
+<section class="module" id="m3">
+  <div class="module-head"><span class="module-num">03</span><h2>Loops</h2></div>
+
+  <div class="topic" id="for">
+    <h3>for loop</h3>
+    <span class="tag def">Definition</span>
+    <p>A <code>for</code> loop repeats a block of code a predetermined number of times, packing three parts into a single header: an <strong>initializer</strong> that runs once before looping starts, a <strong>condition</strong> checked before every pass that stops the loop once it's false, and an <strong>increment/decrement</strong> that updates the counter after every pass. This makes <code>for</code> the natural choice whenever you already know — or can calculate — exactly how many times you need to repeat something.</p>
+    <div class="viz">
+      <span class="viz-label">repeat while condition holds</span>
+      <div class="spinner"><div class="orb"></div><div class="orb"></div><div class="orb"></div><div class="center-label">for<br>$i++</div></div>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>for_loop.php</div><code><span class="kw">&lt;?php</span>
+<span class="kw">for</span> ($i = 1; $i &lt;= 5; $i++) {
+    <span class="fn">echo</span> <span class="st">"Roll No. $i&lt;br&gt;"</span>;
+}
+<span class="cm">// prints Roll No. 1 through Roll No. 5</span></code></pre>
+    <span class="tag use">Use case</span>
+    <p>Printing a numbered attendance list, or generating table rows 1 through N of a fixed size.</p>
+  </div>
+
+  <div class="topic" id="while">
+    <h3>while loop</h3>
+    <span class="tag def">Definition</span>
+    <p>A <code>while</code> loop checks its condition <em>before</em> every single pass through the block, and keeps repeating for as long as that condition stays true. Unlike <code>for</code>, it doesn't require a built-in counter — it's the right tool when the number of repetitions isn't known ahead of time and instead depends on some changing state, such as remaining stock, a user's input, or data still left to read from a file.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>while_loop.php</div><code><span class="kw">&lt;?php</span>
+$stock = 3;
+
+<span class="kw">while</span> ($stock &gt; 0) {
+    <span class="fn">echo</span> <span class="st">"Seat booked, remaining: $stock&lt;br&gt;"</span>;
+    $stock--;
+}</code></pre>
+  </div>
+
+  <div class="topic" id="dowhile">
+    <h3>do…while loop</h3>
+    <span class="tag def">Definition</span>
+    <p>A <code>do…while</code> loop is the mirror image of <code>while</code>: it runs the block of code first, and only checks the condition <em>afterwards</em> to decide whether to loop again. That ordering guarantees the body executes at least once, no matter what the condition evaluates to — a subtle but important difference from a plain <code>while</code> loop, which might never run its body at all if the condition starts out false.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>do_while.php</div><code><span class="kw">&lt;?php</span>
+$attempt = 1;
+
+<span class="kw">do</span> {
+    <span class="fn">echo</span> <span class="st">"Attempt #$attempt&lt;br&gt;"</span>;
+    $attempt++;
+} <span class="kw">while</span> ($attempt &lt;= 3);</code></pre>
+    <div class="callout tip"><strong>Rule of thumb:</strong> reach for <code>do…while</code> for things like a login-retry prompt, where the first attempt must happen before you can even check the condition.</div>
+  </div>
+
+  <div class="topic" id="foreach">
+    <h3>foreach loop</h3>
+    <span class="tag def">Definition</span>
+    <p>The <code>foreach</code> loop is purpose-built for arrays: it walks through every element in turn, automatically handing each one to a variable of your choosing, so you never have to manage an index counter by hand. It comes in two flavours — a simple <code>as $value</code> form for reading just the values, and a <code>as $key =&gt; $value</code> form that also gives you each element's key, which is essential when looping through an associative array.</p>
+    <div class="viz">
+      <span class="viz-label">visiting every element</span>
+      <div class="cells append">
+        <div class="cell">Ravi</div>
+        <div class="cell">Priya</div>
+        <div class="cell">Aman</div>
+        <div class="cell">Next</div>
+      </div>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>foreach.php</div><code><span class="kw">&lt;?php</span>
+$students = [<span class="st">"Ravi"</span>, <span class="st">"Priya"</span>, <span class="st">"Aman"</span>];
+
+<span class="kw">foreach</span> ($students <span class="kw">as</span> $name) {
+    <span class="fn">echo</span> $name . <span class="st">"&lt;br&gt;"</span>;
+}
+
+<span class="cm">// with key => value, e.g. for an associative array</span>
+$marks = [<span class="st">"Ravi"</span> =&gt; 88, <span class="st">"Priya"</span> =&gt; 92];
+<span class="kw">foreach</span> ($marks <span class="kw">as</span> $name =&gt; $score) {
+    <span class="fn">echo</span> <span class="st">"$name scored $score&lt;br&gt;"</span>;
+}</code></pre>
+  </div>
+
+  <div class="topic" id="breakcontinue">
+    <h3>break &amp; continue</h3>
+    <span class="tag def">Definition</span>
+    <p><code>break</code> and <code>continue</code> both alter a loop's normal flow, but in different ways. <code>break</code> exits the loop immediately and completely — execution jumps straight to the first line after the loop, and no further iterations happen at all. <code>continue</code> is gentler: it skips only the remaining code in the <em>current</em> pass and jumps straight back to the loop's condition check, so the loop keeps going with its next iteration.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>break_continue.php</div><code><span class="kw">&lt;?php</span>
+<span class="kw">for</span> ($i = 1; $i &lt;= 10; $i++) {
+    <span class="kw">if</span> ($i == 6) {
+        <span class="kw">break</span>;              <span class="cm">// stop the loop completely at 6</span>
+    }
+    <span class="kw">if</span> ($i % 2 == 0) {
+        <span class="kw">continue</span>;           <span class="cm">// skip even numbers, keep looping</span>
+    }
+    <span class="fn">echo</span> $i . <span class="st">" "</span>;
+}
+<span class="cm">// Output: 1 3 5</span></code></pre>
+  </div>
+  <div class="topic" id="practice3">
+    <h3>Practice Questions — Loops</h3>
+    <details class="qa">
+      <summary>When would you choose a <code>do…while</code> loop over a plain <code>while</code> loop?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>When the loop body must run at least once no matter what — e.g. showing a login prompt before you can even check whether the credentials were correct. <code>while</code> might skip the body entirely if the condition starts false; <code>do…while</code> never does.</div>
+    </details>
+    <details class="qa">
+      <summary>What does <code>foreach ($marks as $name =&gt; $score)</code> give you that a plain <code>foreach ($marks as $score)</code> does not?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>The <code>$name =&gt; $score</code> form also exposes each element's key (useful for associative arrays), while the plain form only gives you the value and discards the key.</div>
+    </details>
+    <details class="qa">
+      <summary>What does this print? <code>for($i=1;$i&lt;=5;$i++){ if($i==3) continue; echo $i; }</code></summary>
+      <div class="answer"><span class="lbl">ANSWER</span>It prints <code>1245</code> — <code>continue</code> skips only the iteration where <code>$i</code> equals 3, printing nothing that round, then the loop carries on normally.</div>
+    </details>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ MODULE 4 ============ -->
+<section class="module" id="m4">
+  <div class="module-head"><span class="module-num">04</span><h2>Functions</h2></div>
+
+  <div class="topic" id="funcbasics">
+    <h3>Defining &amp; Calling Functions</h3>
+    <span class="tag def">Definition</span>
+    <p>A <strong>function</strong> is a named, self-contained block of code that performs a specific task and can be executed — "called" — as many times as needed from anywhere in the script. You <strong>define</strong> it once using the <code>function</code> keyword followed by a name and a pair of parentheses, and you <strong>call</strong> it later simply by writing that name followed by parentheses. Functions are the primary way PHP programmers avoid repeating themselves: write the logic once, reuse it everywhere.</p>
+    <div class="viz">
+      <span class="viz-label">input → logic → output</span>
+      <div class="flow">
+        <div class="node">input<div class="dot"></div></div>
+        <div class="arrow"></div>
+        <div class="node">function()</div>
+        <div class="arrow"></div>
+        <div class="node">output</div>
+      </div>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>functions.php</div><code><span class="kw">&lt;?php</span>
+<span class="kw">function</span> <span class="fn">greetStudent</span>() {
+    <span class="fn">echo</span> <span class="st">"Welcome to the PHP lab!"</span>;
+}
+
+<span class="fn">greetStudent</span>();   <span class="cm">// call it — prints the greeting</span>
+<span class="fn">greetStudent</span>();   <span class="cm">// call it again, as many times as needed</span></code></pre>
+    <span class="tag use">Use case</span>
+    <p>Wrap any logic you'll repeat — validating an email, formatting a price, calculating a grade — into a function instead of copy-pasting the same code in multiple places.</p>
+  </div>
+
+  <div class="topic" id="params">
+    <h3>Parameters &amp; Return Values</h3>
+    <span class="tag def">Definition</span>
+    <p><strong>Parameters</strong> are named placeholders listed inside a function's parentheses that let you feed outside data into the function each time it's called; the actual values you supply at call-time are called <strong>arguments</strong>. The <code>return</code> keyword sends a value back out of the function to wherever it was called from, which lets you capture that result in a variable, print it, or feed it straight into another expression — without <code>return</code>, a function can still run code but has nothing to hand back.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>params_return.php</div><code><span class="kw">&lt;?php</span>
+<span class="kw">function</span> <span class="fn">calculatePercentage</span>($obtained, $total) {
+    <span class="kw">return</span> ($obtained / $total) * 100;
+}
+
+$result = <span class="fn">calculatePercentage</span>(450, 500);
+<span class="fn">echo</span> $result;   <span class="cm">// 90</span></code></pre>
+  </div>
+
+  <div class="topic" id="defargs">
+    <h3>Default &amp; Variable-Length Arguments</h3>
+    <span class="tag def">Definition</span>
+    <p>A <strong>default argument</strong> is a fallback value written into the function's own definition, which is used automatically whenever the caller leaves that parameter out — this makes some arguments effectively optional. A <strong>variadic</strong> parameter, written with three leading dots (<code>...$name</code>), lets a single function accept any number of arguments at all, from zero upward, by silently collecting them into a regular array inside the function body. The two features solve different problems: defaults make a fixed parameter optional, while variadics remove the fixed count entirely.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>default_variadic.php</div><code><span class="kw">&lt;?php</span>
+<span class="cm">// default argument</span>
+<span class="kw">function</span> <span class="fn">enroll</span>($name, $course = <span class="st">"PHP Basics"</span>) {
+    <span class="fn">echo</span> <span class="st">"$name enrolled in $course&lt;br&gt;"</span>;
+}
+<span class="fn">enroll</span>(<span class="st">"Ravi"</span>);                 <span class="cm">// uses the default course</span>
+<span class="fn">enroll</span>(<span class="st">"Priya"</span>, <span class="st">"MERN Stack"</span>);  <span class="cm">// overrides the default</span>
+
+<span class="cm">// variable-length (variadic) arguments</span>
+<span class="kw">function</span> <span class="fn">total</span>(...$marks) {
+    <span class="kw">return</span> <span class="fn">array_sum</span>($marks);
+}
+<span class="fn">echo</span> <span class="fn">total</span>(90, 85, 76, 88);   <span class="cm">// 339 — any number of args works</span></code></pre>
+  </div>
+  <div class="topic" id="practice4">
+    <h3>Practice Questions — Functions</h3>
+    <details class="qa">
+      <summary>What is the difference between a parameter and an argument?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>A parameter is the named placeholder listed in the function's own definition (e.g. <code>$total</code> in <code>function calc($total)</code>). An argument is the actual value supplied when the function is called (e.g. <code>calc(500)</code> — 500 is the argument).</div>
+    </details>
+    <details class="qa">
+      <summary>Write a function <code>square($n)</code> that returns a number squared.</summary>
+      <div class="answer"><span class="lbl">ANSWER</span><code>function square($n) { return $n * $n; }</code> — call it with <code>square(6)</code> to get <code>36</code>.</div>
+    </details>
+    <details class="qa">
+      <summary>What happens if you call <code>enroll("Ravi")</code> when the function is defined as <code>function enroll($name, $course = "PHP Basics")</code>?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>PHP uses the default value for the missing argument, so it behaves as <code>enroll("Ravi", "PHP Basics")</code> and prints "Ravi enrolled in PHP Basics".</div>
+    </details>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ MODULE 5 ============ -->
+<section class="module" id="m5">
+  <div class="module-head"><span class="module-num">05</span><h2>Variable Scope</h2></div>
+
+  <div class="topic" id="scope">
+    <h3>Global, Local &amp; Static Scope</h3>
+    <span class="tag def">Definition</span>
+    <p><strong>Scope</strong> defines the region of a script where a particular variable can be seen and used. A <strong>local</strong> variable is declared inside a function and exists only for that function's own call — it is invisible outside, and even a same-named variable outside is treated as a completely separate one. A <strong>global</strong> variable is declared outside every function, at the top level of the script, but is not automatically available inside a function unless you explicitly pull it in with the <code>global</code> keyword. A <strong>static</strong> variable is declared inside a function using the <code>static</code> keyword, and — unlike an ordinary local variable, which resets every time the function is called — it keeps its value between calls, only being initialised the very first time.</p>
+    <div class="viz">
+      <span class="viz-label">local lives inside · global lives outside</span>
+      <div class="nested">
+        <div class="outer"></div>
+        <div class="outer-label">global scope</div>
+        <div class="inner"><span>local scope</span></div>
+      </div>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>local_global.php</div><code><span class="kw">&lt;?php</span>
+$collegeName = <span class="st">"GEC Gandhi Institute of Technology"</span>;  <span class="cm">// global</span>
+
+<span class="kw">function</span> <span class="fn">showCollege</span>() {
+    $collegeName = <span class="st">"Local College"</span>;   <span class="cm">// local — different variable!</span>
+    <span class="fn">echo</span> $collegeName;               <span class="cm">// "Local College"</span>
+}
+<span class="fn">showCollege</span>();
+<span class="fn">echo</span> $collegeName;   <span class="cm">// still "GEC Gandhi Institute of Technology"</span>
+
+<span class="kw">function</span> <span class="fn">printGlobalCollege</span>() {
+    <span class="kw">global</span> $collegeName;      <span class="cm">// pulls the outer variable in</span>
+    <span class="fn">echo</span> $collegeName;
+}
+<span class="fn">printGlobalCollege</span>();   <span class="cm">// "GEC Gandhi Institute of Technology"</span></code></pre>
+
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>static_scope.php</div><code><span class="kw">&lt;?php</span>
+<span class="kw">function</span> <span class="fn">countVisits</span>() {
+    <span class="kw">static</span> $visits = 0;   <span class="cm">// initialised only once, ever</span>
+    $visits++;
+    <span class="fn">echo</span> <span class="st">"Visit number: $visits&lt;br&gt;"</span>;
+}
+<span class="fn">countVisits</span>();  <span class="cm">// Visit number: 1</span>
+<span class="fn">countVisits</span>();  <span class="cm">// Visit number: 2</span>
+<span class="fn">countVisits</span>();  <span class="cm">// Visit number: 3 — value persisted!</span></code></pre>
+    <span class="tag use">Use case</span>
+    <p>Static variables are handy for a simple call counter, a cache flag, or tracking "has this run before?" inside one function without resorting to a global variable.</p>
+  </div>
+  <div class="topic" id="practice5">
+    <h3>Practice Questions — Scope</h3>
+    <details class="qa">
+      <summary>A variable is declared inside a function. Can it be accessed outside that function? Why?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>No — it is a local variable, so it exists only for the duration of that function call and is destroyed once the function finishes. Code outside the function has no way to see it.</div>
+    </details>
+    <details class="qa">
+      <summary>Why does a static variable "remember" its value between calls, unlike a normal local variable?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>The <code>static</code> keyword tells PHP to initialise the variable only once, the very first time the function runs, and then keep its value in memory between calls instead of resetting it every time the function starts.</div>
+    </details>
+    <details class="qa">
+      <summary>What keyword lets a function read (not just create) a variable declared outside it?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>The <code>global</code> keyword, used inside the function as <code>global $variableName;</code>, before using that variable in the function body.</div>
+    </details>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ MODULE 6 ============ -->
+<section class="module" id="m6">
+  <div class="module-head"><span class="module-num">06</span><h2>Arrays</h2></div>
+
+  <div class="topic" id="anatomy">
+    <h3>Anatomy of an Array</h3>
+    <span class="tag def">Definition</span>
+    <p>An array is a single variable capable of holding multiple values at once, with each individual value reachable through its own <strong>key</strong> — either an automatic numeric position or a name you chose yourself. Internally, PHP stores an array as an ordered list of key-value pairs, which is why iterating over one always visits elements in a predictable, consistent order. You can picture an array as a row of labelled boxes that all share a single variable name, where the label on each box is its key and the contents are its value.</p>
+    <div class="viz">
+      <span class="viz-label">$fruits</span>
+      <div class="cells">
+        <div class="cell">Apple<span class="idx">0</span></div>
+        <div class="cell">Mango<span class="idx">1</span></div>
+        <div class="cell">Banana<span class="idx">2</span></div>
+      </div>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>anatomy.php</div><code><span class="kw">&lt;?php</span>
+$fruits = [<span class="st">"Apple"</span>, <span class="st">"Mango"</span>, <span class="st">"Banana"</span>];
+<span class="cm">//         key 0      key 1      key 2   ← keys are automatic here</span>
+
+<span class="fn">echo</span> $fruits[1];   <span class="cm">// "Mango"</span></code></pre>
+  </div>
+
+  <div class="topic" id="indexed">
+    <h3>Indexed Arrays</h3>
+    <span class="tag def">Definition</span>
+    <p>An indexed array is the simplest and most common array form in PHP: its keys are automatically assigned as sequential integers starting at <code>0</code>, and you never have to specify them yourself unless you want a custom starting point. Because position, not a label, identifies each element, indexed arrays are the natural choice whenever the order of items matters more than giving each one a meaningful name — a list of subjects, a queue of tasks, a set of scores in the order they were entered.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>indexed_array.php</div><code><span class="kw">&lt;?php</span>
+$subjects = [<span class="st">"PHP"</span>, <span class="st">"MERN"</span>, <span class="st">"DBMS"</span>];
+
+<span class="cm">// loop with for (index-based)</span>
+<span class="kw">for</span> ($i = 0; $i &lt; <span class="fn">count</span>($subjects); $i++) {
+    <span class="fn">echo</span> ($i + 1) . <span class="st">". "</span> . $subjects[$i] . <span class="st">"&lt;br&gt;"</span>;
+}
+
+<span class="cm">// loop with foreach (value-based)</span>
+<span class="kw">foreach</span> ($subjects <span class="kw">as</span> $subject) {
+    <span class="fn">echo</span> $subject . <span class="st">"&lt;br&gt;"</span>;
+}</code></pre>
+  </div>
+
+  <div class="topic" id="assoc">
+    <h3>Associative Arrays</h3>
+    <span class="tag def">Definition</span>
+    <p>An associative array replaces automatic numeric keys with custom keys that you choose — usually descriptive strings — so each value is retrieved by a meaningful label instead of a position. This turns the array into something like a small dictionary or record: instead of remembering "index 2 holds the marks", you write <code>$student["marks"]</code> and the intent is obvious from the code itself. Associative arrays are typically used to represent a single real-world entity that has several named attributes.</p>
+    <div class="viz">
+      <span class="viz-label">$student</span>
+      <div class="cells">
+        <div class="cell">Habib<span class="idx">name</span></div>
+        <div class="cell">MERN<span class="idx">course</span></div>
+        <div class="cell">91<span class="idx">marks</span></div>
+      </div>
+    </div>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>assoc_array.php</div><code><span class="kw">&lt;?php</span>
+$student = [
+    <span class="st">"name"</span>  =&gt; <span class="st">"MD Habib"</span>,
+    <span class="st">"course"</span> =&gt; <span class="st">"MERN Stack"</span>,
+    <span class="st">"marks"</span>  =&gt; 91
+];
+
+<span class="fn">echo</span> $student[<span class="st">"name"</span>];   <span class="cm">// "MD Habib"</span>
+
+<span class="cm">// loop with foreach ( key => value )</span>
+<span class="kw">foreach</span> ($student <span class="kw">as</span> $field =&gt; $value) {
+    <span class="fn">echo</span> <span class="st">"$field: $value&lt;br&gt;"</span>;
+}</code></pre>
+    <span class="tag use">Use case</span>
+    <p>Representing one record — a student, a product, a form submission — where every value has a meaningful name attached to it.</p>
+  </div>
+
+  <div class="topic" id="arrfuncs">
+    <h3>Array Functions</h3>
+    <span class="tag def">Definition</span>
+    <p>PHP ships dozens of built-in functions for inspecting, growing, shrinking, searching and reshaping arrays, so you rarely need to write this logic by hand. Broadly they fall into a few families: functions that add or remove elements from either end (<code>array_push</code>, <code>array_pop</code>, <code>array_shift</code>, <code>array_unshift</code>), functions that search or test membership (<code>in_array</code>, <code>array_search</code>), functions that reorder or reshape the whole array (<code>sort</code>, <code>array_merge</code>, <code>array_reverse</code>), and functions that extract just the keys or values. The table below is your quick reference; the demo underneath shows several of them working together on one array.</p>
+    <div class="viz">
+      <span class="viz-label">array_push() appends · array_pop() removes the end</span>
+      <div class="cells append">
+        <div class="cell">72<span class="idx">0</span></div>
+        <div class="cell">88<span class="idx">1</span></div>
+        <div class="cell">65<span class="idx">2</span></div>
+        <div class="cell">+100<span class="idx">new</span></div>
+      </div>
+    </div>
+    <table class="ref">
+      <tr><th>Function</th><th>What it does</th></tr>
+      <tr><td class="fnname">count($a)</td><td>Number of elements in the array</td></tr>
+      <tr><td class="fnname">array_push($a,$v)</td><td>Adds <code>$v</code> to the <em>end</em> of the array</td></tr>
+      <tr><td class="fnname">array_pop($a)</td><td>Removes and returns the <em>last</em> element</td></tr>
+      <tr><td class="fnname">array_unshift($a,$v)</td><td>Adds <code>$v</code> to the <em>start</em> of the array</td></tr>
+      <tr><td class="fnname">array_shift($a)</td><td>Removes and returns the <em>first</em> element</td></tr>
+      <tr><td class="fnname">in_array($v,$a)</td><td>Returns true if <code>$v</code> exists in the array</td></tr>
+      <tr><td class="fnname">array_search($v,$a)</td><td>Returns the key of the first match for <code>$v</code></td></tr>
+      <tr><td class="fnname">sort($a)</td><td>Sorts ascending, re-indexes keys from 0</td></tr>
+      <tr><td class="fnname">rsort($a)</td><td>Sorts descending, re-indexes keys from 0</td></tr>
+      <tr><td class="fnname">array_merge($a,$b)</td><td>Combines two (or more) arrays into one</td></tr>
+      <tr><td class="fnname">array_keys($a)</td><td>Returns just the keys, as a new array</td></tr>
+      <tr><td class="fnname">array_values($a)</td><td>Returns just the values, re-indexed from 0</td></tr>
+      <tr><td class="fnname">array_splice($a,$o,$l)</td><td>Removes/replaces a slice starting at offset <code>$o</code>, length <code>$l</code></td></tr>
+      <tr><td class="fnname">unset($a[$k])</td><td>Deletes the element at key <code>$k</code> (leaves a gap in indexed arrays)</td></tr>
+      <tr><td class="fnname">array_reverse($a)</td><td>Reverses the order of elements</td></tr>
+      <tr><td class="fnname">array_unique($a)</td><td>Removes duplicate values, keeps first occurrence's key</td></tr>
+    </table>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>array_functions_demo.php</div><code><span class="kw">&lt;?php</span>
+$marks = [72, 88, 65, 91, 88];
+
+<span class="fn">echo</span> <span class="fn">count</span>($marks);              <span class="cm">// 5</span>
+
+<span class="fn">array_push</span>($marks, 100);         <span class="cm">// [72,88,65,91,88,100]</span>
+<span class="fn">array_pop</span>($marks);               <span class="cm">// removes 100 -&gt; back to 5 items</span>
+<span class="fn">array_unshift</span>($marks, 60);       <span class="cm">// [60,72,88,65,91,88]</span>
+<span class="fn">array_shift</span>($marks);             <span class="cm">// removes 60 from the front</span>
+
+<span class="fn">var_dump</span>(<span class="fn">in_array</span>(88, $marks));   <span class="cm">// true</span>
+<span class="fn">echo</span> <span class="fn">array_search</span>(88, $marks);      <span class="cm">// 1 (first index where 88 appears)</span>
+
+$sorted = $marks;
+<span class="fn">sort</span>($sorted);                    <span class="cm">// ascending</span>
+$topDown = $marks;
+<span class="fn">rsort</span>($topDown);                  <span class="cm">// descending</span>
+
+$more = <span class="fn">array_merge</span>($marks, [95, 40]);
+
+$student = [<span class="st">"name"</span> =&gt; <span class="st">"Ravi"</span>, <span class="st">"marks"</span> =&gt; 91];
+<span class="fn">print_r</span>(<span class="fn">array_keys</span>($student));    <span class="cm">// ["name","marks"]</span>
+<span class="fn">print_r</span>(<span class="fn">array_values</span>($student));  <span class="cm">// ["Ravi",91]</span>
+
+<span class="fn">array_splice</span>($marks, 1, 2);      <span class="cm">// remove 2 elements starting at index 1</span>
+<span class="fn">unset</span>($marks[0]);               <span class="cm">// delete first element, leaves a gap</span>
+
+$unique = <span class="fn">array_unique</span>([1,2,2,3,3,3]);  <span class="cm">// [1,2,3]</span>
+$flipped = <span class="fn">array_reverse</span>([1,2,3]);      <span class="cm">// [3,2,1]</span></code></pre>
+    <div class="quiz-hint">Whiteboard exercise: ask students to predict <code>$marks</code>'s contents after each line, then verify with <code>print_r($marks)</code>.</div>
+  </div>
+  <div class="topic" id="practice6">
+    <h3>Practice Questions — Arrays</h3>
+    <details class="qa">
+      <summary>What is the key difference between an indexed array and an associative array?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>An indexed array uses automatic sequential integer keys starting at 0, while an associative array uses custom keys — usually descriptive strings — that you choose yourself.</div>
+    </details>
+    <details class="qa">
+      <summary>Given <code>$marks = [72, 88, 65];</code>, what does <code>array_pop($marks)</code> return, and what does <code>$marks</code> look like afterward?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>It returns <code>65</code> (the last element) and removes it, leaving <code>$marks</code> as <code>[72, 88]</code>.</div>
+    </details>
+    <details class="qa">
+      <summary>How would you find out whether the value 88 exists anywhere in <code>$marks</code>?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>Use <code>in_array(88, $marks)</code> — it returns <code>true</code> or <code>false</code>. If you also need to know <em>where</em> it is, use <code>array_search(88, $marks)</code> instead, which returns the matching key.</div>
+    </details>
+    <details class="qa">
+      <summary>What does <code>array_merge([1,2], [3,4])</code> return?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span><code>[1, 2, 3, 4]</code> — the two arrays are combined into one, in order, with fresh sequential keys for indexed arrays.</div>
+    </details>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ MODULE 7 ============ -->
+<section class="module" id="m7">
+  <div class="module-head"><span class="module-num">07</span><h2>Strings</h2></div>
+
+  <div class="topic" id="strformat">
+    <h3>Formatting Strings — Presentation vs. Storage</h3>
+    <span class="tag def">Definition</span>
+    <p><strong>Formatting for presentation</strong> means reshaping text purely so a human reader finds it clearer or more attractive — capitalising each word of a name before displaying it, or reversing text for a stylised banner. <strong>Formatting for storage</strong> means cleaning text so it's consistent, predictable and safe before it is saved somewhere permanent, such as a database — trimming stray leading and trailing spaces, or lower-casing an email address so <code>"Ravi@Mail.com "</code> and <code>"ravi@mail.com"</code> are recognised as the very same account rather than two different ones. The two goals sometimes call for the same function used differently, so it helps to always ask which one you're solving for before writing the code.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>presentation.php</div><code><span class="kw">&lt;?php</span>
+$name = <span class="st">"md habib"</span>;
+<span class="fn">echo</span> <span class="fn">ucwords</span>($name);   <span class="cm">// "Md Habib" — nice for display</span></code></pre>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>storage.php</div><code><span class="kw">&lt;?php</span>
+$email = <span class="st">"  Ravi@Mail.com  "</span>;
+$clean = <span class="fn">strtolower</span>(<span class="fn">trim</span>($email));
+<span class="fn">echo</span> $clean;   <span class="cm">// "ravi@mail.com" — safe &amp; consistent for the database</span></code></pre>
+  </div>
+
+  <div class="topic" id="strjoin">
+    <h3>Joining &amp; Splitting Strings</h3>
+    <span class="tag def">Definition</span>
+    <p><code>implode()</code> takes an array and glues all of its elements together into a single string, placing your chosen separator between each pair of elements. <code>explode()</code> performs the exact opposite operation: it takes one string and breaks it apart into an array, cutting wherever a given separator character or substring appears. Used together, the pair lets you move data freely back and forth between "array form" (easy to loop over and manipulate) and "string form" (easy to store, print, or send in a URL).</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>join_split.php</div><code><span class="kw">&lt;?php</span>
+$subjects = [<span class="st">"PHP"</span>, <span class="st">"MERN"</span>, <span class="st">"DBMS"</span>];
+$csv = <span class="fn">implode</span>(<span class="st">", "</span>, $subjects);
+<span class="fn">echo</span> $csv;   <span class="cm">// "PHP, MERN, DBMS"</span>
+
+$back = <span class="fn">explode</span>(<span class="st">", "</span>, $csv);
+<span class="fn">print_r</span>($back);   <span class="cm">// ["PHP","MERN","DBMS"]</span></code></pre>
+    <span class="tag use">Use case</span>
+    <p><code>implode()</code> is perfect for turning a tags array into a comma-separated string to store; <code>explode()</code> is perfect for turning a submitted comma-separated form field back into an array.</p>
+  </div>
+
+  <div class="topic" id="strcompare">
+    <h3>Comparing Strings</h3>
+    <span class="tag def">Definition</span>
+    <p>The simplest way to compare two strings is with <code>==</code> or <code>===</code>, which tell you only whether they are equal or not. When you need to know more — specifically, which of the two strings would come first alphabetically — reach for <code>strcmp()</code>, which returns a negative number, zero, or a positive number depending on how the strings order against each other, or <code>strcasecmp()</code> for the same comparison while ignoring letter case entirely. These comparison functions are especially useful when building your own custom sorting logic.</p>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>compare.php</div><code><span class="kw">&lt;?php</span>
+<span class="fn">var_dump</span>(<span class="st">"php"</span> == <span class="st">"php"</span>);            <span class="cm">// true</span>
+<span class="fn">var_dump</span>(<span class="st">"php"</span> === <span class="st">"PHP"</span>);           <span class="cm">// false — case-sensitive</span>
+
+<span class="fn">echo</span> <span class="fn">strcmp</span>(<span class="st">"apple"</span>, <span class="st">"banana"</span>);   <span class="cm">// negative -&gt; "apple" sorts before "banana"</span>
+<span class="fn">echo</span> <span class="fn">strcasecmp</span>(<span class="st">"PHP"</span>, <span class="st">"php"</span>);  <span class="cm">// 0 -&gt; equal, ignoring case</span></code></pre>
+  </div>
+
+  <div class="topic" id="strfuncs">
+    <h3>String Functions</h3>
+    <span class="tag def">Definition</span>
+    <p>Beyond joining, splitting and comparing, PHP provides a large everyday toolbox of functions for measuring, cleaning, searching and reshaping text — covering tasks like finding a string's length, locating a substring inside a larger one, swapping out unwanted text, and adjusting letter case. Mastering this core set of functions covers the overwhelming majority of text-handling needs you'll run into while building forms, reports and user-facing pages.</p>
+    <div class="viz">
+      <span class="viz-label">strrev() mirrors the string</span>
+      <div class="cells flip">
+        <div class="cell"><span>P</span></div>
+        <div class="cell"><span>H</span></div>
+        <div class="cell"><span>P</span></div>
+      </div>
+    </div>
+    <table class="ref">
+      <tr><th>Function</th><th>What it does</th></tr>
+      <tr><td class="fnname">strlen($s)</td><td>Length of the string, in characters</td></tr>
+      <tr><td class="fnname">str_word_count($s)</td><td>Number of words in the string</td></tr>
+      <tr><td class="fnname">strrev($s)</td><td>Reverses the string</td></tr>
+      <tr><td class="fnname">ucfirst($s)</td><td>Capitalises only the first letter</td></tr>
+      <tr><td class="fnname">ucwords($s)</td><td>Capitalises the first letter of every word</td></tr>
+      <tr><td class="fnname">str_replace($find,$new,$s)</td><td>Replaces every occurrence of <code>$find</code> with <code>$new</code></td></tr>
+      <tr><td class="fnname">strpos($s,$find)</td><td>Position of the first occurrence of <code>$find</code> (or <code>false</code>)</td></tr>
+      <tr><td class="fnname">strcmp($a,$b)</td><td>Byte-by-byte comparison; 0 means equal</td></tr>
+      <tr><td class="fnname">strcasecmp($a,$b)</td><td>Same as strcmp, but ignores case</td></tr>
+      <tr><td class="fnname">str_repeat($s,$n)</td><td>Repeats the string <code>$n</code> times</td></tr>
+      <tr><td class="fnname">strtoupper($s)</td><td>Converts to ALL CAPS</td></tr>
+      <tr><td class="fnname">strtolower($s)</td><td>Converts to all lowercase</td></tr>
+      <tr><td class="fnname">trim($s)</td><td>Strips whitespace from both ends</td></tr>
+      <tr><td class="fnname">substr($s,$start,$len)</td><td>Extracts a portion of the string</td></tr>
+      <tr><td class="fnname">explode($sep,$s)</td><td>Splits a string into an array</td></tr>
+      <tr><td class="fnname">implode($sep,$arr)</td><td>Joins an array into a string</td></tr>
+    </table>
+    <pre class="code"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>string_functions_demo.php</div><code><span class="kw">&lt;?php</span>
+$msg = <span class="st">"  php is fun to learn  "</span>;
+
+<span class="fn">echo</span> <span class="fn">strlen</span>($msg);              <span class="cm">// 24 (includes the spaces)</span>
+<span class="fn">echo</span> <span class="fn">str_word_count</span>($msg);      <span class="cm">// 5</span>
+<span class="fn">echo</span> <span class="fn">strrev</span>(<span class="st">"php"</span>);           <span class="cm">// run it and check the real output yourself!</span>
+<span class="fn">echo</span> <span class="fn">ucfirst</span>(<span class="fn">trim</span>($msg));     <span class="cm">// "Php is fun to learn"</span>
+<span class="fn">echo</span> <span class="fn">ucwords</span>(<span class="fn">trim</span>($msg));     <span class="cm">// "Php Is Fun To Learn"</span>
+<span class="fn">echo</span> <span class="fn">str_replace</span>(<span class="st">"fun"</span>, <span class="st">"powerful"</span>, $msg);  <span class="cm">// "  php is powerful to learn  "</span>
+<span class="fn">echo</span> <span class="fn">strpos</span>($msg, <span class="st">"fun"</span>);     <span class="cm">// 9 (index where "fun" starts)</span>
+<span class="fn">echo</span> <span class="fn">str_repeat</span>(<span class="st">"="</span>, 10);     <span class="cm">// "=========="</span>
+<span class="fn">echo</span> <span class="fn">strtoupper</span>(<span class="fn">trim</span>($msg));   <span class="cm">// "PHP IS FUN TO LEARN"</span>
+<span class="fn">echo</span> <span class="fn">substr</span>(<span class="fn">trim</span>($msg), 0, 3);  <span class="cm">// "php"</span></code></pre>
+    <div class="quiz-hint">Note the deliberate trick above: <code>strrev("php")</code> — ask students to run it themselves and check the real output rather than guessing. Encourages testing code instead of assuming.</div>
+  </div>
+  <div class="topic" id="practice7">
+    <h3>Practice Questions — Strings</h3>
+    <details class="qa">
+      <summary>What does <code>trim(" hello ")</code> return, and why is this useful before saving user input?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>It returns <code>"hello"</code>, with the leading and trailing spaces stripped. Trimming input before saving prevents accidental duplicate-looking records caused by invisible extra whitespace.</div>
+    </details>
+    <details class="qa">
+      <summary>What is the difference between <code>ucfirst()</code> and <code>ucwords()</code>?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span><code>ucfirst()</code> capitalises only the very first letter of the whole string, while <code>ucwords()</code> capitalises the first letter of <em>every</em> word in the string.</div>
+    </details>
+    <details class="qa">
+      <summary>How would you turn the string <code>"php,mern,dbms"</code> into an array of three subjects?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span>Use <code>explode(",", "php,mern,dbms")</code>, which splits the string wherever a comma appears and returns <code>["php","mern","dbms"]</code>.</div>
+    </details>
+    <details class="qa">
+      <summary>What does <code>substr("Hello World", 6, 5)</code> return?</summary>
+      <div class="answer"><span class="lbl">ANSWER</span><code>"World"</code> — it starts extracting at index 6 (the "W") and takes 5 characters from there.</div>
+    </details>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+<section class="module" id="m8">
+  <div class="module-head"><span class="module-num">08</span><h2>Final Assessment</h2></div>
+  <p>A quick 8-question check spanning every module. Pick an answer for each, then press <strong>Check my score</strong> — correct choices turn green, incorrect ones turn red, and a short explanation appears underneath each question.</p>
+
+  <form id="assessmentForm">
+
+    <div class="quiz-block" data-answer="b">
+      <p class="q">1. Which tag correctly opens a block of PHP code?</p>
+      <label class="opt"><input type="radio" name="q1" value="a"> &lt;php&gt;</label>
+      <label class="opt"><input type="radio" name="q1" value="b"> &lt;?php</label>
+      <label class="opt"><input type="radio" name="q1" value="c"> &lt;script php&gt;</label>
+      <div class="explain">PHP code blocks always begin with <code>&lt;?php</code>.</div>
+    </div>
+
+    <div class="quiz-block" data-answer="c">
+      <p class="q">2. What will <code>var_dump(5 === "5")</code> print?</p>
+      <label class="opt"><input type="radio" name="q2" value="a"> bool(true)</label>
+      <label class="opt"><input type="radio" name="q2" value="b"> int(5)</label>
+      <label class="opt"><input type="radio" name="q2" value="c"> bool(false)</label>
+      <div class="explain"><code>===</code> is strict — it compares type as well as value, and <code>5</code> (int) is not the same type as <code>"5"</code> (string).</div>
+    </div>
+
+    <div class="quiz-block" data-answer="b">
+      <p class="q">3. Which loop is guaranteed to run its body at least once?</p>
+      <label class="opt"><input type="radio" name="q3" value="a"> while</label>
+      <label class="opt"><input type="radio" name="q3" value="b"> do…while</label>
+      <label class="opt"><input type="radio" name="q3" value="c"> foreach</label>
+      <div class="explain"><code>do…while</code> checks its condition only after running the body once, so the body always executes at least one time.</div>
+    </div>
+
+    <div class="quiz-block" data-answer="a">
+      <p class="q">4. Inside a <code>switch</code>, what happens if you forget a <code>break;</code>?</p>
+      <label class="opt"><input type="radio" name="q4" value="a"> Execution falls through into the next case</label>
+      <label class="opt"><input type="radio" name="q4" value="b"> PHP throws a fatal error</label>
+      <label class="opt"><input type="radio" name="q4" value="c"> Nothing — switch cases stop automatically</label>
+      <div class="explain">Without <code>break</code>, PHP keeps executing the code in the following case(s) too — this is called "fall-through".</div>
+    </div>
+
+    <div class="quiz-block" data-answer="c">
+      <p class="q">5. What does a <code>static</code> variable inside a function do?</p>
+      <label class="opt"><input type="radio" name="q5" value="a"> Makes the variable accessible everywhere in the script</label>
+      <label class="opt"><input type="radio" name="q5" value="b"> Resets to its initial value on every call</label>
+      <label class="opt"><input type="radio" name="q5" value="c"> Keeps its value between separate calls to the function</label>
+      <div class="explain">A <code>static</code> variable is initialised only once and then remembers its value across every subsequent call to that same function.</div>
+    </div>
+
+    <div class="quiz-block" data-answer="b">
+      <p class="q">6. Which function adds a new element to the <em>end</em> of an array?</p>
+      <label class="opt"><input type="radio" name="q6" value="a"> array_unshift()</label>
+      <label class="opt"><input type="radio" name="q6" value="b"> array_push()</label>
+      <label class="opt"><input type="radio" name="q6" value="c"> array_shift()</label>
+      <div class="explain"><code>array_push()</code> appends to the end; <code>array_unshift()</code> adds to the start; <code>array_shift()</code> removes from the start.</div>
+    </div>
+
+    <div class="quiz-block" data-answer="a">
+      <p class="q">7. What does <code>implode(", ", ["PHP","MERN"])</code> return?</p>
+      <label class="opt"><input type="radio" name="q7" value="a"> "PHP, MERN"</label>
+      <label class="opt"><input type="radio" name="q7" value="b"> ["PHP", "MERN"]</label>
+      <label class="opt"><input type="radio" name="q7" value="c"> "PHPMERN"</label>
+      <div class="explain"><code>implode()</code> joins array elements into one string, placing the given separator between each pair of elements.</div>
+    </div>
+
+    <div class="quiz-block" data-answer="c">
+      <p class="q">8. Which associative-array syntax correctly reads the "marks" value?</p>
+      <label class="opt"><input type="radio" name="q8" value="a"> $student-&gt;marks</label>
+      <label class="opt"><input type="radio" name="q8" value="b"> $student(marks)</label>
+      <label class="opt"><input type="radio" name="q8" value="c"> $student["marks"]</label>
+      <div class="explain">Associative array values are read using square brackets with the key inside quotes: <code>$student["marks"]</code>.</div>
+    </div>
+
+  </form>
+
+  <button id="checkScoreBtn" type="button">Check my score</button>
+  <div id="scoreBox"></div>
+</section>
+
+<script>
+  document.getElementById('checkScoreBtn').addEventListener('click', function(){
+    var blocks = document.querySelectorAll('.quiz-block');
+    var score = 0;
+    blocks.forEach(function(block){
+      var correct = block.getAttribute('data-answer');
+      var checked = block.querySelector('input[type=radio]:checked');
+      var opts = block.querySelectorAll('.opt');
+      opts.forEach(function(opt){ opt.classList.remove('correct','incorrect'); });
+      opts.forEach(function(opt){
+        var val = opt.querySelector('input').value;
+        if (val === correct) { opt.classList.add('correct'); }
+      });
+      if (checked) {
+        if (checked.value === correct) { score++; }
+        else { checked.closest('.opt').classList.add('incorrect'); }
+      }
+      block.classList.add('answered');
+    });
+    var box = document.getElementById('scoreBox');
+    box.style.display = 'block';
+    box.textContent = 'Score: ' + score + ' / ' + blocks.length +
+      (score === blocks.length ? '  — perfect! ' : score >= blocks.length/2 ? '  — good, review the red ones.' : '  — revisit the modules above and try again.');
+  });
+</script>
+
+</main>
+</div>
+
+<footer>
+  Prepared for PHP / MERN trainer sessions · MD Habib · GEC Gandhi Institute of Technology
+</footer>
+
+<script>
+  document.querySelectorAll('nav.toc a[href^="#"]').forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var id = this.getAttribute('href').slice(1);
+      var target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({behavior: 'smooth', block: 'start'});
+        if (history.replaceState) { history.replaceState(null, '', '#' + id); }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
