@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHP Module 2 – OOP, Exceptions, MySQL &amp; Forms</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1b2033;--mut:#5a6180;--line:#dfe3f0;--php:#6b5fc7;--db:#0a7d93;--ok:#1f8a4c;--bad:#c93a4a;--code:#161a2b;--codeink:#e6e9f7;--hl:#ffe9a8}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1220;--card:#181c30;--ink:#e8ebf8;--mut:#9aa1c4;--line:#2a3050;--php:#9d92ff;--db:#37c0d8;--ok:#4cd08a;--bad:#ff7a87;--code:#0a0d19;--hl:#5a4a10}}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 Georgia,"Iowan Old Style",serif;display:flex}
+nav{position:sticky;top:0;height:100vh;width:240px;flex:none;padding:22px 16px;border-right:1px solid var(--line);overflow:auto;font-family:system-ui,sans-serif;font-size:14px}
+nav b{display:block;font-size:15px;margin-bottom:12px;color:var(--php)}
+nav a{display:block;padding:5px 8px;color:var(--mut);text-decoration:none;border-radius:6px}nav a:hover,nav a:focus-visible{background:var(--line);color:var(--ink);outline:none}
+main{flex:1;min-width:0;max-width:880px;margin:0 auto;padding:32px 24px 80px}
+h1{font:800 clamp(28px,5vw,44px)/1.1 system-ui,sans-serif;margin:0 0 8px}
+h2{font:700 26px system-ui,sans-serif;margin:56px 0 4px;padding-top:16px;border-top:3px solid var(--php)}
+h3{font:650 18px system-ui,sans-serif;margin:28px 0 6px}
+p{margin:8px 0}.lead{color:var(--mut);font-size:18px}
+.def,.use{border-left:4px solid var(--php);background:var(--card);padding:10px 16px;border-radius:0 8px 8px 0;margin:12px 0;font-family:system-ui,sans-serif;font-size:15px}
+.use{border-color:var(--db)}.def b,.use b{color:var(--php)}.use b{color:var(--db)}
+pre{background:var(--code);color:var(--codeink);padding:14px 16px;border-radius:8px;overflow-x:auto;font:13.5px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0;tab-size:2}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em;background:var(--line);padding:1px 5px;border-radius:4px}pre code{background:none;padding:0}
+.out{border-left:3px solid var(--ok);margin-top:-6px}.out::before{content:"Output";display:block;color:var(--ok);font:12px system-ui;margin-bottom:4px}
+table{border-collapse:collapse;width:100%;font:14px system-ui,sans-serif;background:var(--card);display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left}th{background:var(--line)}
+.demo{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0;font-family:system-ui,sans-serif;font-size:14px}
+button{font:600 14px system-ui,sans-serif;background:var(--php);color:#fff;border:0;padding:8px 14px;border-radius:8px;cursor:pointer;margin:4px 6px 4px 0}
+button.alt{background:var(--db)}button.bad{background:var(--bad)}button:focus-visible{outline:3px solid var(--hl)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.box{padding:9px 14px;border:2px solid var(--line);border-radius:8px;background:var(--bg);transition:.3s}
+.box.on{border-color:var(--php);background:var(--hl);color:#000;transform:scale(1.06)}.box.err.on{border-color:var(--bad)}.box.dbn.on{border-color:var(--db)}
+.arr{color:var(--mut)}
+.objs{display:flex;gap:10px;flex-wrap:wrap;min-height:64px}
+.obj{background:var(--php);color:#fff;padding:8px 12px;border-radius:8px;animation:pop .4s}
+@keyframes pop{from{transform:scale(0) rotate(-20deg);opacity:0}}
+.tree{display:flex;flex-direction:column;align-items:center;gap:0}.tree .row{display:flex;gap:24px}
+.line{width:3px;height:26px;background:repeating-linear-gradient(var(--php) 0 6px,transparent 6px 10px);background-size:3px 10px;animation:dash 1s linear infinite}
+@keyframes dash{to{background-position:0 10px}}
+.track{position:relative;height:6px;background:var(--line);border-radius:3px;margin:16px 10px}
+.dot{position:absolute;top:-6px;left:0;width:18px;height:18px;border-radius:50%;background:var(--db);animation:travel 3s ease-in-out infinite alternate}
+@keyframes travel{to{left:calc(100% - 18px);background:var(--php)}}
+.q{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:12px 16px;margin:12px 0;font-family:system-ui,sans-serif}
+.q label{display:block;padding:4px 0;cursor:pointer}.q .fb{font-size:13px;margin-top:6px}
+.good{color:var(--ok)}.wrong{color:var(--bad)}
+.tasks li{margin:8px 0}
+@media(max-width:820px){body{display:block}nav{position:static;height:auto;width:auto;border:0;border-bottom:1px solid var(--line)}nav a{display:inline-block}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.scn{border:1px solid var(--line);border-left:5px solid var(--bad);background:var(--card);border-radius:8px;padding:12px 16px;margin:14px 0;font:15px system-ui,sans-serif}.scn summary{cursor:pointer;color:var(--php);font-weight:600}
+</style></head><body>
+<nav aria-label="Contents"><b>Module 2 · 9 hrs</b>
+<a href="#oop">1. OOP basics</a><a href="#class">2. Classes &amp; objects</a><a href="#access">3. Access modifiers</a><a href="#ctor">4. Constructors</a><a href="#enc">5. Encapsulation</a><a href="#inh">6. Inheritance</a><a href="#over">7. Method overriding</a><a href="#exc">8. Exception handling</a><a href="#mysql">9. PHP &amp; MySQL</a><a href="#dml">10. DML operations</a><a href="#forms">11. Forms &amp; input</a><a href="#validate">12. Validation</a><a href="#multi">13. Checkbox/radio/select</a><a href="#pa">14. Part A answers</a><a href="#pb">15. Part B programs</a><a href="#pc">16. Part C programs</a><a href="#conn">17. Procedural vs OOP connection</a><a href="#crud">18. CRUD mini app</a><a href="#assess">Assessment</a><a href="#scn">Scenario tasks</a></nav>
+<main>
+<h1>OOP’s &amp; MySQL Connection</h1>
+<p class="lead">Module 2 notes for PHP: object-oriented programming, exceptions, database work and form handling. Each topic has a definition, example code, a diagram or animation, and a real use case.</p>
+
+<h2 id="oop">1. Introduction to OOP in PHP</h2>
+<div class="def"><b>Definition:</b> Object-Oriented Programming (OOP) organises code around <em>objects</em> that bundle data (properties) with the functions that work on it (methods), instead of loose functions and variables.</div>
+<table><tr><th>Concept</th><th>Meaning</th><th>Real-world analogy</th></tr>
+<tr><td>Class</td><td>Blueprint / template</td><td>House plan</td></tr>
+<tr><td>Object</td><td>Instance of a class</td><td>A house built from the plan</td></tr>
+<tr><td>Property</td><td>Variable inside a class</td><td>Colour, size</td></tr>
+<tr><td>Method</td><td>Function inside a class</td><td>Open door</td></tr>
+<tr><td>Encapsulation</td><td>Hide data, expose controlled access</td><td>ATM hides the bank vault</td></tr>
+<tr><td>Inheritance</td><td>Child reuses parent code</td><td>Child inherits family traits</td></tr>
+<tr><td>Polymorphism / overriding</td><td>Same method, different behaviour</td><td>“Speak” differs for dog and cat</td></tr></table>
+<div class="use"><b>Use case:</b> Large apps (e-commerce, school portals) use classes like <code>User</code>, <code>Product</code>, <code>Order</code> so code is reusable, organised and easier to maintain.</div>
+
+<h2 id="class">2. Classes, Objects, Properties &amp; Methods</h2>
+<div class="def"><b>Definition:</b> A <code>class</code> defines properties and methods. An <em>object</em> is created with <code>new</code>. Inside a class, <code>$this</code> refers to the current object; use <code>-&gt;</code> to reach properties and methods.</div>
+<pre><code>&lt;?php
+class Student {
+    public $name;            // property
+    public $marks = 0;
+
+    public function setMarks($m) {   // method
+        $this-&gt;marks = $m;
+    }
+    public function result() {
+        return $this-&gt;marks &gt;= 40 ? "Pass" : "Fail";
+    }
+}
+$s1 = new Student();         // object
+$s1-&gt;name = "Asha";
+$s1-&gt;setMarks(72);
+echo $s1-&gt;name . " - " . $s1-&gt;result();</code></pre>
+<pre class="out"><code>Asha - Pass</code></pre>
+<div class="demo"><b>Animation: one class, many objects.</b> Click to create objects from the <code>Student</code> blueprint.<br>
+<div class="flow"><div class="box on">class Student { $name; $marks; }</div><span class="arr">creates ⟶</span></div>
+<div class="objs" id="objs" aria-live="polite"></div>
+<button onclick="mk()">new Student()</button><button class="bad" onclick="objs.innerHTML='';n=0">Reset</button></div>
+<div class="use"><b>Use case:</b> Each row of a student table becomes one <code>Student</code> object with its own data but the same behaviour.</div>
+
+<h2 id="access">3. Access Modifiers</h2>
+<div class="def"><b>Definition:</b> Keywords that control where a property or method can be accessed from.</div>
+<table><tr><th>Modifier</th><th>Same class</th><th>Child class</th><th>Outside</th></tr>
+<tr><td><code>public</code></td><td>✔</td><td>✔</td><td>✔</td></tr>
+<tr><td><code>protected</code></td><td>✔</td><td>✔</td><td>✘</td></tr>
+<tr><td><code>private</code></td><td>✔</td><td>✘</td><td>✘</td></tr></table>
+<pre><code>&lt;?php
+class Account {
+    public $owner = "Ravi";
+    protected $branch = "Bhubaneswar";
+    private $balance = 5000;
+    public function show() { return $this-&gt;balance; }   // OK inside class
+}
+$a = new Account();
+echo $a-&gt;owner;      // works
+echo $a-&gt;show();     // works (5000)
+echo $a-&gt;balance;    // Fatal error: Cannot access private property</code></pre>
+<div class="use"><b>Use case:</b> Keep sensitive data (balance, password hash) <code>private</code> so no other code can change it directly.</div>
+
+<h2 id="ctor">4. Constructors</h2>
+<div class="def"><b>Definition:</b> <code>__construct()</code> is a special method that runs automatically when an object is created. It is used to set initial values.</div>
+<h3>Default constructor (no parameters)</h3>
+<pre><code>&lt;?php
+class Car {
+    public $brand;
+    public function __construct() { $this-&gt;brand = "Unknown"; }
+}
+$c = new Car(); echo $c-&gt;brand;   // Unknown</code></pre>
+<h3>Parameterized constructor</h3>
+<pre><code>&lt;?php
+class Car {
+    public function __construct(public $brand, public $year) {}  // PHP 8 promotion
+}
+$c = new Car("Tata", 2024); echo $c-&gt;brand;   // Tata</code></pre>
+<h3>Constructor with default arguments</h3>
+<pre><code>&lt;?php
+class Car {
+    public function __construct(public $brand = "Generic", public $year = 2020) {}
+}
+$a = new Car();                // Generic 2020
+$b = new Car("Honda");         // Honda 2020
+$c = new Car("Kia", 2025);     // Kia 2025</code></pre>
+<div class="use"><b>Use case:</b> A <code>Database</code> class connects to MySQL inside its constructor, so every object is ready to use immediately.</div>
+
+<h2 id="enc">5. Encapsulation</h2>
+<div class="def"><b>Definition:</b> Wrapping data and methods in one class and restricting direct access to the data, using <code>private</code> properties with public <em>getters</em> and <em>setters</em> that can validate input.</div>
+<pre><code>&lt;?php
+class BankAccount {
+    private float $balance = 0;
+    public function deposit(float $amt) {
+        if ($amt &gt; 0) $this-&gt;balance += $amt;
+    }
+    public function withdraw(float $amt) {
+        if ($amt &gt; 0 &amp;&amp; $amt &lt;= $this-&gt;balance) $this-&gt;balance -= $amt;
+    }
+    public function getBalance() { return $this-&gt;balance; }
+}
+$acc = new BankAccount();
+$acc-&gt;deposit(1000); $acc-&gt;withdraw(300);
+echo $acc-&gt;getBalance();   // 700</code></pre>
+<div class="demo"><b>Diagram:</b> outside code can only reach data through the public methods.
+<div class="flow"><div class="box">Outside code</div><span class="arr">⟶</span><div class="box on">deposit() / getBalance()</div><span class="arr">⟶</span><div class="box">private $balance</div></div></div>
+<div class="use"><b>Use case:</b> Stops invalid states such as a negative balance or an age of −5.</div>
+
+<h2 id="inh">6. Inheritance</h2>
+<div class="def"><b>Definition:</b> A child class gets the public and protected members of a parent class using <code>extends</code>, and can add its own. It promotes code reuse (“is-a” relationship).</div>
+<pre><code>&lt;?php
+class Person {
+    public function __construct(protected $name) {}
+    public function intro() { return "I am {$this-&gt;name}"; }
+}
+class Teacher extends Person {
+    public function subject() { return "{$this-&gt;name} teaches PHP"; }
+}
+$t = new Teacher("Mr. Das");
+echo $t-&gt;intro();     // inherited
+echo $t-&gt;subject();   // own method</code></pre>
+<div class="demo"><b>Animation: hierarchy</b> – arrows show code flowing from parent to children.
+<div class="tree"><div class="box on">Person (name, intro())</div><div class="line"></div>
+<div class="row"><div class="box">Teacher</div><div class="box">Student</div><div class="box">Admin</div></div></div></div>
+<div class="use"><b>Use case:</b> <code>Admin</code>, <code>Customer</code> and <code>Vendor</code> extend a common <code>User</code> class that already handles login and profile.</div>
+
+<h2 id="over">7. Method Overriding</h2>
+<div class="def"><b>Definition:</b> A child class redefines a method it inherited, using the same name and parameters, to give it new behaviour. <code>parent::method()</code> calls the original.</div>
+<pre><code>&lt;?php
+class Animal {
+    public function speak() { return "Some sound"; }
+}
+class Dog extends Animal {
+    public function speak() { return "Woof!"; }                  // overrides
+}
+class Puppy extends Dog {
+    public function speak() { return parent::speak() . " (squeaky)"; }
+}
+foreach ([new Animal, new Dog, new Puppy] as $a) echo $a-&gt;speak() . "\n";</code></pre>
+<pre class="out"><code>Some sound
+Woof!
+Woof! (squeaky)</code></pre>
+<div class="use"><b>Use case:</b> Payment classes <code>CardPayment</code> and <code>UpiPayment</code> both override <code>pay()</code>, so checkout code just calls <code>$p-&gt;pay()</code>.</div>
+
+<h2 id="exc">8. Exception Handling</h2>
+<div class="def"><b>Definition:</b> An exception is an object that represents an error. Instead of crashing, PHP lets you <code>throw</code> it and <code>catch</code> it elsewhere so the program can recover gracefully.</div>
+<table><tr><th>Keyword</th><th>Purpose</th></tr>
+<tr><td><code>try</code></td><td>Code that might fail</td></tr><tr><td><code>throw</code></td><td>Raises an exception object</td></tr>
+<tr><td><code>catch</code></td><td>Handles the exception</td></tr><tr><td><code>finally</code></td><td>Always runs (cleanup: close file/DB)</td></tr></table>
+<pre><code>&lt;?php
+function divide($a, $b) {
+    if ($b == 0) throw new Exception("Cannot divide by zero");
+    return $a / $b;
+}
+try {
+    echo divide(10, 2);          // 5
+    echo divide(5, 0);           // throws
+} catch (Exception $e) {
+    echo "Error: " . $e-&gt;getMessage();   // Cannot divide by zero
+    // also: getCode(), getLine(), getFile()
+} finally {
+    echo "\nDone";               // always prints
+}</code></pre>
+<div class="demo"><b>Animation: execution flow.</b> Choose a scenario.
+<div class="flow" id="ef"><div class="box" id="e1">try { }</div><span class="arr">⟶</span><div class="box err" id="e2">catch (Exception $e)</div><span class="arr">⟶</span><div class="box" id="e3">finally { }</div><span class="arr">⟶</span><div class="box" id="e4">Rest of program</div></div>
+<button class="alt" onclick="ex(false)">No error</button><button class="bad" onclick="ex(true)">Throw exception</button></div>
+<h3>Custom exceptions (basic)</h3>
+<pre><code>&lt;?php
+class InsufficientFundsException extends Exception {
+    public function errorMessage() {
+        return "Line {$this-&gt;getLine()}: {$this-&gt;getMessage()}";
+    }
+}
+try {
+    $balance = 100;
+    if (500 &gt; $balance) throw new InsufficientFundsException("Balance too low");
+} catch (InsufficientFundsException $e) {
+    echo $e-&gt;errorMessage();
+} catch (Exception $e) {          // more general catch goes last
+    echo "General error";
+}</code></pre>
+<div class="use"><b>Use case:</b> Wrap a database call in <code>try/catch</code> to show “Service busy, try again” instead of exposing passwords in an error page.</div>
+
+<h2 id="mysql">9. PHP and MySQL: Introduction &amp; Connection</h2>
+<div class="def"><b>Definition:</b> MySQL is a relational database that stores data in tables. PHP talks to it with <code>mysqli</code> (MySQL Improved) or PDO. The steps are: connect → send query → read result → close.</div>
+<div class="demo"><b>Animation: request journey.</b> Data travels browser → PHP → MySQL.
+<div class="flow"><div class="box">Browser (form)</div><div class="box on">PHP (server)</div><div class="box dbn on">MySQL database</div></div>
+<div class="track"><div class="dot"></div></div></div>
+<p>Prepare the database once (phpMyAdmin or terminal):</p>
+<pre><code>CREATE DATABASE school;
+USE school;
+CREATE TABLE students (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  email VARCHAR(80),
+  marks INT
+);</code></pre>
+<pre><code>&lt;?php  // db.php
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);  // errors become exceptions
+try {
+    $conn = new mysqli("localhost", "root", "", "school");   // host, user, pass, db
+    echo "Connected successfully";
+} catch (mysqli_sql_exception $e) {
+    die("Connection failed: " . $e-&gt;getMessage());
+}</code></pre>
+<div class="use"><b>Use case:</b> Login systems, blogs, attendance and billing apps all keep data in MySQL and read it with PHP.</div>
+
+<h2 id="dml">10. Basic DML: Insert, Select, Update, Delete</h2>
+<div class="def"><b>Definition:</b> DML (Data Manipulation Language) commands change or read the data in tables. <b>Setting query parameters</b> means using placeholders (<code>?</code>) in a <em>prepared statement</em> and binding values separately, which prevents SQL injection.</div>
+<table><tr><th>Operation</th><th>SQL</th></tr>
+<tr><td>Insert</td><td><code>INSERT INTO students(name,email,marks) VALUES(?,?,?)</code></td></tr>
+<tr><td>Select</td><td><code>SELECT * FROM students WHERE marks &gt; ?</code></td></tr>
+<tr><td>Update</td><td><code>UPDATE students SET marks=? WHERE id=?</code></td></tr>
+<tr><td>Delete</td><td><code>DELETE FROM students WHERE id=?</code></td></tr></table>
+<p>Bind types: <code>s</code> string, <code>i</code> integer, <code>d</code> double.</p>
+<pre><code>&lt;?php
+include "db.php";
+
+// INSERT
+$stmt = $conn-&gt;prepare("INSERT INTO students(name,email,marks) VALUES(?,?,?)");
+$name = "Asha"; $email = "asha@mail.com"; $marks = 82;
+$stmt-&gt;bind_param("ssi", $name, $email, $marks);
+$stmt-&gt;execute();
+echo "Inserted id: " . $conn-&gt;insert_id;
+
+// SELECT
+$min = 50;
+$stmt = $conn-&gt;prepare("SELECT id, name, marks FROM students WHERE marks &gt; ?");
+$stmt-&gt;bind_param("i", $min);
+$stmt-&gt;execute();
+$result = $stmt-&gt;get_result();
+while ($row = $result-&gt;fetch_assoc()) {
+    echo "{$row['id']} - {$row['name']} ({$row['marks']})&lt;br&gt;";
+}
+
+// UPDATE
+$stmt = $conn-&gt;prepare("UPDATE students SET marks=? WHERE id=?");
+$m = 90; $id = 1;
+$stmt-&gt;bind_param("ii", $m, $id);
+$stmt-&gt;execute();
+echo $stmt-&gt;affected_rows . " row updated";
+
+// DELETE
+$stmt = $conn-&gt;prepare("DELETE FROM students WHERE id=?");
+$stmt-&gt;bind_param("i", $id);
+$stmt-&gt;execute();
+
+$conn-&gt;close();</code></pre>
+<h3>OOP + MySQL together</h3>
+<pre><code>&lt;?php
+class Student {
+    public function __construct(private mysqli $db) {}
+    public function add(string $n, string $e, int $m): bool {
+        $s = $this-&gt;db-&gt;prepare("INSERT INTO students(name,email,marks) VALUES(?,?,?)");
+        $s-&gt;bind_param("ssi", $n, $e, $m);
+        return $s-&gt;execute();
+    }
+    public function all(): array {
+        return $this-&gt;db-&gt;query("SELECT * FROM students")-&gt;fetch_all(MYSQLI_ASSOC);
+    }
+}
+$repo = new Student($conn);
+$repo-&gt;add("Ravi", "ravi@mail.com", 67);</code></pre>
+<div class="use"><b>Use case:</b> Admin panel: <em>Insert</em> = add student, <em>Select</em> = list page, <em>Update</em> = edit marks, <em>Delete</em> = remove record. Never put user input directly into the SQL string.</div>
+
+<h2 id="forms">11. HTML Forms, GET vs POST &amp; Server-Side Handling</h2>
+<div class="def"><b>Definition:</b> A form (<code>&lt;form&gt;</code>) collects user input and sends it to a PHP script named in <code>action</code>, using the HTTP method in <code>method</code>. PHP reads the values in the superglobals <code>$_GET</code> or <code>$_POST</code> (<code>$_REQUEST</code> holds both).</div>
+<table><tr><th></th><th>GET</th><th>POST</th></tr>
+<tr><td>Data location</td><td>In the URL (<code>?name=Asha</code>)</td><td>In the request body</td></tr>
+<tr><td>Visible / bookmarkable</td><td>Yes</td><td>No</td></tr>
+<tr><td>Size limit</td><td>About 2000 characters</td><td>Large</td></tr>
+<tr><td>Security</td><td>Never for passwords</td><td>Better for sensitive data</td></tr>
+<tr><td>Use for</td><td>Search, filters, pagination</td><td>Login, registration, uploads</td></tr></table>
+<pre><code>&lt;!-- form.html --&gt;
+&lt;form action="process.php" method="post"&gt;
+  &lt;label&gt;Name: &lt;input type="text" name="name"&gt;&lt;/label&gt;
+  &lt;label&gt;Email: &lt;input type="email" name="email"&gt;&lt;/label&gt;
+  &lt;button type="submit"&gt;Save&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<pre><code>&lt;?php  // process.php
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $name  = $_POST["name"]  ?? "";
+    $email = $_POST["email"] ?? "";
+    echo "Hello, " . htmlspecialchars($name);   // escape output to stop XSS
+}
+// GET example: page.php?city=Puri  →  echo $_GET['city'];</code></pre>
+<div class="use"><b>Use case:</b> A search box uses GET so results can be shared by link; a registration form uses POST so the password isn’t in the URL.</div>
+
+<h2 id="validate">12. Validation of User Input</h2>
+<div class="def"><b>Definition:</b> Checking that submitted data is present, correctly formatted and safe <em>on the server</em> before using it. Browser-side checks can be bypassed, so PHP must always validate.</div>
+<pre><code>&lt;?php
+$errors = [];
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $name  = trim($_POST["name"] ?? "");
+    $email = trim($_POST["email"] ?? "");
+    $age   = $_POST["age"] ?? "";
+
+    if ($name === "")                                   $errors[] = "Name is required";
+    elseif (!preg_match("/^[A-Za-z ]{2,50}$/", $name))  $errors[] = "Name: letters only";
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL))     $errors[] = "Invalid email";
+    if (!filter_var($age, FILTER_VALIDATE_INT, ["options" =&gt; ["min_range" =&gt; 1, "max_range" =&gt; 120]]))
+                                                        $errors[] = "Age must be 1-120";
+
+    if (!$errors) {
+        $name = htmlspecialchars($name);      // sanitise for display
+        echo "Valid! Saving...";
+    } else {
+        foreach ($errors as $e) echo "&lt;p style='color:red'&gt;$e&lt;/p&gt;";
+    }
+}</code></pre>
+<table><tr><th>Function</th><th>Use</th></tr><tr><td><code>trim()</code></td><td>Remove extra spaces</td></tr><tr><td><code>empty()/isset()</code></td><td>Check presence</td></tr><tr><td><code>filter_var()</code></td><td>Validate email, int, URL</td></tr><tr><td><code>htmlspecialchars()</code></td><td>Escape HTML on output</td></tr><tr><td><code>preg_match()</code></td><td>Pattern check</td></tr></table>
+<div class="use"><b>Use case:</b> Registration page rejects “abc@” as an email and shows all errors at once instead of crashing.</div>
+
+<h2 id="multi">13. Multiple Inputs: Checkboxes, Radio Buttons &amp; Dropdowns</h2>
+<div class="def"><b>Definition:</b> Radio buttons and dropdowns send <em>one</em> value; checkboxes can send <em>many</em>, so their name must end with <code>[]</code> to make PHP receive an array. Unchecked boxes and unselected radios are not sent at all.</div>
+<pre><code>&lt;form method="post" action="multi.php"&gt;
+  Gender:
+  &lt;input type="radio" name="gender" value="Male"&gt; Male
+  &lt;input type="radio" name="gender" value="Female"&gt; Female
+
+  Skills:
+  &lt;input type="checkbox" name="skills[]" value="PHP"&gt; PHP
+  &lt;input type="checkbox" name="skills[]" value="MySQL"&gt; MySQL
+  &lt;input type="checkbox" name="skills[]" value="JS"&gt; JS
+
+  Course:
+  &lt;select name="course"&gt;
+    &lt;option value=""&gt;-- choose --&lt;/option&gt;
+    &lt;option value="BCA"&gt;BCA&lt;/option&gt;
+    &lt;option value="MCA"&gt;MCA&lt;/option&gt;
+  &lt;/select&gt;
+  &lt;button&gt;Submit&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<pre><code>&lt;?php  // multi.php
+$gender = $_POST["gender"] ?? "Not selected";
+$skills = $_POST["skills"] ?? [];          // array
+$course = $_POST["course"] ?? "";
+
+echo "Gender: " . htmlspecialchars($gender) . "&lt;br&gt;";
+echo "Skills: " . (empty($skills) ? "None" : implode(", ", array_map('htmlspecialchars', $skills))) . "&lt;br&gt;";
+echo "Course: " . ($course !== "" ? htmlspecialchars($course) : "Not chosen");</code></pre>
+<pre class="out"><code>Gender: Female
+Skills: PHP, MySQL
+Course: MCA</code></pre>
+<div class="demo"><b>Try it:</b> a live form that mimics what PHP receives.
+<form onsubmit="return tryF(event)" style="display:grid;gap:8px">
+<div>Gender: <label><input type="radio" name="g" value="Male"> Male</label> <label><input type="radio" name="g" value="Female"> Female</label></div>
+<div>Skills: <label><input type="checkbox" name="s" value="PHP"> PHP</label> <label><input type="checkbox" name="s" value="MySQL"> MySQL</label> <label><input type="checkbox" name="s" value="JS"> JS</label></div>
+<div><label>Course: <select id="c"><option value="">-- choose --</option><option>BCA</option><option>MCA</option></select></label></div>
+<div><button>Submit</button></div></form>
+<pre id="post" style="margin:0">$_POST = [ ]</pre></div>
+<div class="use"><b>Use case:</b> Survey and job-application forms; the selected checkbox array is stored in MySQL as a comma-separated list or rows in a linking table.</div>
+
+<h2 id="pa">14. Question bank Part A: 2-mark answers</h2><table><tr><th>#</th><th>Topic</th><th>Answer</th></tr><tr><td>1</td><td>Class &amp; object</td><td>Class = blueprint, object = instance. <code>class Dog{} $d = new Dog();</code></td></tr><tr><td>2</td><td>Student $name</td><td><code>class Student{public $name;} $s=new Student(); $s-&gt;name=&quot;Asha&quot;; echo $s-&gt;name;</code></td></tr><tr><td>3</td><td>Constructor</td><td>Special method <code>function __construct(params){ }</code> that runs automatically on <code>new</code>; it initialises properties.</td></tr><tr><td>4</td><td>Car start()</td><td><code>class Car{function start(){echo &quot;Car Started&quot;;}} (new Car)-&gt;start();</code></td></tr><tr><td>5</td><td>Inheritance</td><td>Child reuses parent members: <code>class Child extends Parent{ }</code>.</td></tr><tr><td>6</td><td>Animal / Dog</td><td><code>class Animal{function sound(){echo &quot;Sound&quot;;}} class Dog extends Animal{} (new Dog)-&gt;sound();</code></td></tr><tr><td>7</td><td>DML</td><td>Data Manipulation Language: INSERT, SELECT, UPDATE, DELETE (reads/changes rows).</td></tr><tr><td>8</td><td>Default constructor</td><td>Constructor with no parameters: <code>function __construct(){ $this-&gt;brand=&quot;Unknown&quot;; }</code></td></tr><tr><td>9</td><td>Negative number</td><td><code>function chk($n){ if($n&lt;0) throw new Exception(&quot;Negative&quot;); return $n; } try{chk(-5);}catch(Exception $e){echo $e-&gt;getMessage();}</code></td></tr><tr><td>10</td><td>Employee class</td><td><code>class Employee{public $name,$salary; function display(){echo &quot;$this-&gt;name $this-&gt;salary&quot;;}} $e=new Employee(); $e-&gt;name=&quot;Ravi&quot;; $e-&gt;salary=30000; $e-&gt;display();</code></td></tr><tr><td>11</td><td>Parameterized constructor</td><td>Constructor that takes arguments: <code>function __construct($n,$a){$this-&gt;n=$n;$this-&gt;a=$a;}</code> then <code>new P(&quot;Ann&quot;,20)</code></td></tr><tr><td>12</td><td>Exception handling</td><td>Catching runtime errors with <code>try/catch/finally</code> so the program recovers instead of crashing.</td></tr><tr><td>13</td><td>HTML form (POST)</td><td><code>&lt;form method=&quot;post&quot; action=&quot;save.php&quot;&gt;&lt;input name=&quot;name&quot;&gt;&lt;input type=&quot;email&quot; name=&quot;email&quot;&gt;&lt;input type=&quot;password&quot; name=&quot;password&quot;&gt;&lt;button&gt;Send&lt;/button&gt;&lt;/form&gt;</code></td></tr><tr><td>14</td><td>Method overriding</td><td>Child redefines a parent method with the same name: Dog::speak() replaces Animal::speak() (see section 7).</td></tr><tr><td>15</td><td>Run MySQL query</td><td><code>mysqli_query($conn, &quot;SELECT * FROM mydata&quot;);</code> (OOP form: <code>$conn-&gt;query()</code>)</td></tr><tr><td>16</td><td>Query parameter</td><td>A <code>?</code> placeholder in a prepared statement, filled later with <code>bind_param()</code> (stops SQL injection).</td></tr><tr><td>17</td><td>Run full web app</td><td>1) Install XAMPP, start Apache + MySQL. 2) Create database/table in phpMyAdmin. 3) Put project folder in <code>htdocs</code>. 4) Write HTML form + PHP script with mysqli. 5) Open <code>http://localhost/project/index.php</code>, submit, verify rows in phpMyAdmin.</td></tr><tr><td>18</td><td>GET vs POST</td><td>GET: data in URL, visible, limited size, for search. POST: data in body, hidden, large, for login/registration.</td></tr><tr><td>19</td><td>Form validation</td><td>Checking user input is present, correctly formatted and safe before use.</td></tr><tr><td>20</td><td>$_POST</td><td>Superglobal array holding form fields sent by method=post, e.g. <code>$_POST[&quot;name&quot;]</code></td></tr><tr><td>21</td><td>CREATE TABLE</td><td><code>CREATE TABLE mydata(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), email VARCHAR(100), password VARCHAR(255));</code></td></tr><tr><td>22</td><td>Server-side validation</td><td>Checks done in PHP after submission; cannot be bypassed like JavaScript checks.</td></tr><tr><td>23</td><td>isset()</td><td>Returns true if a variable is set and not null: <code>isset($_POST[&quot;sb&quot;])</code></td></tr><tr><td>24</td><td>throw</td><td>Raises an exception object: <code>throw new Exception(&quot;msg&quot;);</code> control jumps to the matching catch.</td></tr><tr><td>25</td><td>Child overrides parent</td><td><code>class A{function hi(){echo &quot;A&quot;;}} class B extends A{function hi(){echo &quot;B&quot;;}} (new B)-&gt;hi(); // B</code></td></tr><tr><td>26</td><td>Connect PHP to MySQL</td><td><code>mysqli_connect($host,$user,$password,$dbname)</code>: host (localhost), username (root), password (empty in XAMPP), database name. Returns a connection or false.</td></tr><tr><td>27</td><td>isset($_POST['sb']) snippet</td><td>Runs only when the submit button named <code>sb</code> was pressed; then copies fields <code>name, mail, pass</code> from the POST array into <code>$name, $email, $password</code>.</td></tr><tr><td>28</td><td>$this</td><td>Refers to the current object inside a class: <code>$this-&gt;name</code></td></tr></table><h2 id="pb">15. Question bank Part B: 5-mark programs</h2><h3>B1a, B5, B10: MyClass, Student (Greet), Parrot</h3><pre><code>&lt;?php
+class MyClass { public $name; public $age; }
+$o = new MyClass(); $o-&gt;name = &quot;Ravi&quot;; $o-&gt;age = 20;
+echo &quot;$o-&gt;name is $o-&gt;age&lt;br&gt;&quot;;
+
+class Student { public $name; public $RollNo;
+  function Greet() { echo &quot;Welcome to the PHP Classes&quot;; } }
+$student1 = new Student(); $student1-&gt;name = &quot;Asha&quot;; $student1-&gt;RollNo = 101;
+echo &quot;$student1-&gt;name ($student1-&gt;RollNo): &quot;; $student1-&gt;Greet();
+
+class Parrot { public $name; public $age; }
+$parrot1 = new Parrot(); $parrot1-&gt;name = &quot;Mitthu&quot;; $parrot1-&gt;age = 2;
+$parrot2 = new Parrot(); $parrot2-&gt;name = &quot;Tiya&quot;;   $parrot2-&gt;age = 4;
+echo &quot;&lt;br&gt;Parrot 1: {$parrot1-&gt;name}, age {$parrot1-&gt;age}&lt;br&gt;Parrot 2: {$parrot2-&gt;name}, age {$parrot2-&gt;age}&quot;;</code></pre><h3>B1b, B8, B11: Animal (parameterized), Movie, Car (default constructor)</h3><pre><code>&lt;?php
+class Animal { public $name, $age;
+  function __construct($n, $a) { $this-&gt;name = $n; $this-&gt;age = $a; }
+  function display_info() { echo &quot;$this-&gt;name is $this-&gt;age years old&lt;br&gt;&quot;; } }
+(new Animal(&quot;Tiger&quot;, 5))-&gt;display_info();  (new Animal(&quot;Deer&quot;, 3))-&gt;display_info();
+
+class Movie { public $heroname, $year;
+  function __construct($h, $y) { $this-&gt;heroname = $h; $this-&gt;year = $y; } }
+$m = new Movie(&quot;Prabhas&quot;, 2015); echo &quot;$m-&gt;heroname, $m-&gt;year&lt;br&gt;&quot;;
+
+class Car { public $brand, $year;
+  function __construct() { $this-&gt;brand = &quot;Tata&quot;; $this-&gt;year = 2024; }   // default constructor
+  function display_info() { echo &quot;Brand: $this-&gt;brand, Year: $this-&gt;year&quot;; } }
+$car1 = new Car(); $car1-&gt;display_info();</code></pre><h3>B2, B12: try-catch-finally with division</h3><pre><code>&lt;?php
+function divide($a, $b) {
+  if ($b == 0) throw new DivisionByZeroError(&quot;Divisor is zero&quot;);  // built-in; new Exception() also works
+  return $a / $b;
+}
+try { echo &quot;Result: &quot; . divide(10, 0); }
+catch (Throwable $e) { echo &quot;Sorry, you cannot divide by zero.&quot;; }
+finally { echo &quot;&lt;br&gt;Operation attempted&quot;; }</code></pre><h3>B3: Types of constructors</h3><table><tr><th>Type</th><th>Example</th></tr><tr><td>Default</td><td><code>function __construct(){ $this-&gt;x=0; }</code></td></tr><tr><td>Parameterized</td><td><code>function __construct($x){ $this-&gt;x=$x; }</code></td></tr><tr><td>With default arguments</td><td><code>function __construct($x=10){ }</code></td></tr></table><p>Full examples are in section 4. PHP allows only one <code>__construct</code> per class (no overloading).</p><h3>B4, B9: HTML + PHP + MySQLi form (MyDataBase / mydata)</h3><p>For B9 use database <code>companydb</code>, table <code>employees(emp_name, emp_id, department)</code> and the same structure.</p><pre><code>CREATE DATABASE MyDataBase; USE MyDataBase;
+CREATE TABLE mydata(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL,
+                    email VARCHAR(100) NOT NULL, password VARCHAR(255) NOT NULL);</code></pre><pre><code>&lt;!-- index.html --&gt;
+&lt;form action=&quot;insert.php&quot; method=&quot;post&quot;&gt;
+  Name: &lt;input type=&quot;text&quot; name=&quot;name&quot; required&gt;
+  Email: &lt;input type=&quot;email&quot; name=&quot;email&quot; required&gt;
+  Password: &lt;input type=&quot;password&quot; name=&quot;password&quot; required&gt;
+  &lt;button type=&quot;submit&quot; name=&quot;sb&quot;&gt;Register&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;?php // insert.php
+$conn = mysqli_connect(&quot;localhost&quot;, &quot;root&quot;, &quot;&quot;, &quot;MyDataBase&quot;);
+if (!$conn) die(&quot;Connection failed: &quot; . mysqli_connect_error());
+if (isset($_POST[&quot;sb&quot;])) {
+  $pw = password_hash($_POST[&quot;password&quot;], PASSWORD_DEFAULT);
+  $st = $conn-&gt;prepare(&quot;INSERT INTO mydata(name,email,password) VALUES(?,?,?)&quot;);
+  $st-&gt;bind_param(&quot;sss&quot;, $_POST[&quot;name&quot;], $_POST[&quot;email&quot;], $pw);
+  echo $st-&gt;execute() ? &quot;Data inserted successfully&quot; : &quot;Error: &quot; . $conn-&gt;error;
+}
+$conn-&gt;close();</code></pre><h3>B6: Form submission and storage</h3><p><b>Form submission</b> is the browser sending field values to a server script when the user clicks submit. Flow: (1) user fills the form; (2) browser sends <code>name=value</code> pairs by POST to the <code>action</code> file; (3) PHP reads <code>$_POST</code>; (4) validates and sanitises; (5) connects with <code>mysqli</code> and runs a prepared <code>INSERT</code>; (6) shows a success or error message.</p><h3>B7: Types of inheritance</h3><pre><code>&lt;?php
+class GrandParent { function a() { echo &quot;A &quot;; } }
+class Father extends GrandParent { function b() { echo &quot;B &quot;; } }      // single: GrandParent -&gt; Father
+class Son extends Father { function c() { echo &quot;C&quot;; } }               // multilevel: -&gt; Son
+$s = new Son(); $s-&gt;a(); $s-&gt;b(); $s-&gt;c();     // A B C</code></pre><p>Single = one parent, one child. Multilevel = a chain of classes. <b>PHP has no multiple inheritance</b> (a class extends only one class); use interfaces or traits instead.</p><h2 id="pc">16. Question bank Part C: 10-mark programs</h2><h3>C1: Car (details, start, stop, update price)</h3><pre><code>&lt;?php
+class Car {
+  public $running = false;
+  function __construct(public $make, public $model, public $mileage, public $year, public $color, private $price) {}
+  function details() { echo &quot;$this-&gt;make $this-&gt;model ($this-&gt;year, $this-&gt;color), $this-&gt;mileage km, Rs.$this-&gt;price&lt;br&gt;&quot;; }
+  function start() { $this-&gt;running = true;  echo &quot;$this-&gt;model started&lt;br&gt;&quot;; }
+  function stop()  { $this-&gt;running = false; echo &quot;$this-&gt;model stopped&lt;br&gt;&quot;; }
+  function updatePrice($p) { if ($p &gt; 0) $this-&gt;price = $p; }
+}
+$c1 = new Car(&quot;Toyota&quot;,&quot;Innova&quot;,12000,2022,&quot;White&quot;,2500000);
+$c2 = new Car(&quot;Tata&quot;,&quot;Nexon&quot;,8000,2023,&quot;Blue&quot;,1200000);
+$c1-&gt;details(); $c1-&gt;start(); $c1-&gt;updatePrice(2400000); $c1-&gt;details(); $c1-&gt;stop(); $c2-&gt;details();</code></pre><h3>C2, C4: Database connectivity and Student Registration (studentdb / students)</h3><p><b>Steps:</b> (1) create database and table; (2) <code>mysqli_connect(host,user,pass,db)</code> and check for failure; (3) receive and validate <code>$_POST</code>; (4) prepare the <code>INSERT</code> and bind values; (5) <code>execute()</code>; (6) print success or failure; (7) close the connection.</p><pre><code>CREATE DATABASE studentdb; USE studentdb;
+CREATE TABLE students(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), roll VARCHAR(20), course VARCHAR(50));
+
+&lt;?php // register.php  (form fields: name, roll, course, button sb)
+$conn = mysqli_connect(&quot;localhost&quot;, &quot;root&quot;, &quot;&quot;, &quot;studentdb&quot;);
+if (!$conn) die(&quot;Connection failed: &quot; . mysqli_connect_error());
+if (isset($_POST[&quot;sb&quot;])) {
+  $st = $conn-&gt;prepare(&quot;INSERT INTO students(name,roll,course) VALUES(?,?,?)&quot;);
+  $st-&gt;bind_param(&quot;sss&quot;, $_POST[&quot;name&quot;], $_POST[&quot;roll&quot;], $_POST[&quot;course&quot;]);
+  if ($st-&gt;execute()) echo &quot;Student data inserted successfully&quot;;
+  else echo &quot;Insertion failed: &quot; . $conn-&gt;error;
+}
+$conn-&gt;close();</code></pre><h3>C3: Inheritance + encapsulation (Employee, Manager)</h3><pre><code>&lt;?php
+class Employee {
+  public static $company = &quot;Tech Corp&quot;;
+  private $emp_id; protected $name;
+  function __construct($id, $name) { $this-&gt;emp_id = $id; $this-&gt;name = $name; }
+  function Emp_Details() { echo self::$company . &quot; | ID: $this-&gt;emp_id | Name: $this-&gt;name&quot;; }
+}
+class Manager extends Employee {
+  public $department;
+  function __construct($id, $name, $dept) { parent::__construct($id, $name); $this-&gt;department = $dept; }
+  function Emp_Details() { parent::Emp_Details(); echo &quot; | Dept: $this-&gt;department&quot;; }
+}
+(new Manager(7, &quot;Meera&quot;, &quot;IT&quot;))-&gt;Emp_Details();</code></pre><p>A <code>private</code> member of the parent is invisible to the child, so the child calls the parent method to show <code>emp_id</code>.</p><h3>C5: Vehicle and Car (overriding, parent::)</h3><pre><code>&lt;?php
+class Vehicle {
+  public static $company = &quot;Auto Motors&quot;;
+  protected $brand; public $model;
+  function __construct($b, $m) { $this-&gt;brand = $b; $this-&gt;model = $m; }
+  function displayDetails() { echo self::$company . &quot;, $this-&gt;brand, $this-&gt;model&lt;br&gt;&quot;; }
+}
+class Car extends Vehicle {
+  public $price;
+  function __construct($b, $m, $p) { parent::__construct($b, $m); $this-&gt;price = $p; }
+  function displayDetails() { parent::displayDetails(); echo &quot;Price: $this-&gt;price&quot;; }
+}
+(new Car(&quot;Toyota&quot;, &quot;Innova&quot;, 2500000))-&gt;displayDetails();</code></pre><h3>C6: Student registration form with all input types (form.html + process.php)</h3><p>Files: <code>form.html</code>, external <code>style.css</code>, <code>process.php</code>. The form needs <code>method="post" enctype="multipart/form-data"</code>; checkboxes use <code>interests[]</code>; the file input is read from <code>$_FILES</code>, not <code>$_POST</code>.</p><pre><code>&lt;!-- form.html (essentials) --&gt;
+&lt;form action=&quot;process.php&quot; method=&quot;post&quot; enctype=&quot;multipart/form-data&quot;&gt;
+  &lt;input type=&quot;text&quot; name=&quot;fullname&quot;&gt; &lt;input type=&quot;email&quot; name=&quot;email&quot;&gt; &lt;input type=&quot;date&quot; name=&quot;dob&quot;&gt;
+  &lt;input type=&quot;radio&quot; name=&quot;gender&quot; value=&quot;Male&quot;&gt; &lt;input type=&quot;radio&quot; name=&quot;gender&quot; value=&quot;Female&quot;&gt;
+  &lt;input type=&quot;tel&quot; name=&quot;phone&quot;&gt; &lt;textarea name=&quot;address&quot;&gt;&lt;/textarea&gt;
+  &lt;select name=&quot;course&quot;&gt;&lt;option value=&quot;&quot;&gt;Select&lt;/option&gt;&lt;option&gt;B.Tech CS&lt;/option&gt;&lt;/select&gt;
+  &lt;select name=&quot;year&quot;&gt;&lt;option value=&quot;&quot;&gt;Select&lt;/option&gt;&lt;option&gt;2nd Year&lt;/option&gt;&lt;/select&gt;
+  &lt;input type=&quot;checkbox&quot; name=&quot;interests[]&quot; value=&quot;Web Development&quot;&gt; ...
+  &lt;input type=&quot;file&quot; name=&quot;photo&quot;&gt; &lt;input type=&quot;password&quot; name=&quot;password&quot;&gt;
+  &lt;input type=&quot;checkbox&quot; name=&quot;terms&quot;&gt; &lt;button name=&quot;sb&quot;&gt;Submit Registration&lt;/button&gt; &lt;button type=&quot;reset&quot;&gt;Reset&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;?php // process.php
+$e = []; $v = fn($k) =&gt; trim($_POST[$k] ?? &quot;&quot;);
+if (!preg_match(&quot;/^[A-Za-z ]{3,}$/&quot;, $v(&quot;fullname&quot;)))      $e[&quot;fullname&quot;] = &quot;Letters and spaces, min 3 chars&quot;;
+if (!filter_var($v(&quot;email&quot;), FILTER_VALIDATE_EMAIL))        $e[&quot;email&quot;]    = &quot;Invalid email&quot;;
+$d = DateTime::createFromFormat(&quot;Y-m-d&quot;, $v(&quot;dob&quot;));
+if (!$d || $d &gt;= new DateTime(&quot;today&quot;))                     $e[&quot;dob&quot;]      = &quot;Enter a valid past date&quot;;
+if (!preg_match(&quot;/^[0-9]{10}$/&quot;, $v(&quot;phone&quot;)))              $e[&quot;phone&quot;]    = &quot;10 digits required&quot;;
+if (empty($_POST[&quot;gender&quot;]))                                $e[&quot;gender&quot;]   = &quot;Select gender&quot;;
+if ($v(&quot;course&quot;) === &quot;&quot; || $v(&quot;year&quot;) === &quot;&quot;)               $e[&quot;course&quot;]   = &quot;Select course and year&quot;;
+if (empty($_POST[&quot;interests&quot;]))                             $e[&quot;interests&quot;]= &quot;Select at least one&quot;;
+if (strlen($v(&quot;password&quot;)) &lt; 6)                             $e[&quot;password&quot;] = &quot;Minimum 6 characters&quot;;
+$f = $_FILES[&quot;photo&quot;] ?? null;
+$ext = strtolower(pathinfo($f[&quot;name&quot;] ?? &quot;&quot;, PATHINFO_EXTENSION));
+if (!$f || $f[&quot;error&quot;] !== 0 || !in_array($ext, [&quot;jpg&quot;,&quot;jpeg&quot;,&quot;png&quot;,&quot;gif&quot;]) || $f[&quot;size&quot;] &gt; 2*1024*1024)
+                                                            $e[&quot;photo&quot;]    = &quot;jpg/jpeg/png/gif, max 2MB&quot;;
+if ($e) { foreach ($e as $f =&gt; $m) echo &quot;&lt;p class=&#x27;error&#x27;&gt;$f: $m&lt;/p&gt;&quot;; echo &quot;&lt;a href=&#x27;form.html&#x27;&gt;Go back&lt;/a&gt;&quot;; exit; }
+move_uploaded_file($_FILES[&quot;photo&quot;][&quot;tmp_name&quot;], &quot;uploads/&quot; . basename($f[&quot;name&quot;]));  // uploads/ folder must exist
+echo &quot;&lt;h3&gt;Registration Successful!&lt;/h3&gt;&lt;table&gt;&quot;;
+foreach ([&quot;fullname&quot;,&quot;email&quot;,&quot;dob&quot;,&quot;gender&quot;,&quot;phone&quot;,&quot;address&quot;,&quot;course&quot;,&quot;year&quot;] as $k) echo &quot;&lt;tr&gt;&lt;td&gt;$k&lt;/td&gt;&lt;td&gt;&quot; . htmlspecialchars($v($k)) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;
+echo &quot;&lt;tr&gt;&lt;td&gt;interests&lt;/td&gt;&lt;td&gt;&quot; . htmlspecialchars(implode(&quot;, &quot;, $_POST[&quot;interests&quot;])) . &quot;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;password&lt;/td&gt;&lt;td&gt;********&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;a href=&#x27;form.html&#x27;&gt;Go Back&lt;/a&gt;&quot;;</code></pre><p>Marks guide: form and all input types 2, layout/CSS 2, POST handling 2, validation 2, display 1, error messages 1. To show errors beside each field, store <code>$e</code> in <code>$_SESSION</code> and redirect back to <code>form.php</code>.</p><h3>C7: BankAccount mini project</h3><pre><code>&lt;?php
+class BankAccount {
+  public $holder; protected $accNo; private $balance;
+  function __construct($h, $no, $bal) { $this-&gt;holder = $h; $this-&gt;accNo = $no; $this-&gt;balance = $bal; }
+  function deposit($a)  { if ($a &gt; 0) { $this-&gt;balance += $a; echo &quot;Deposited $a&lt;br&gt;&quot;; } }
+  function withdraw($a) { if ($a &gt; 0 &amp;&amp; $a &lt;= $this-&gt;balance) { $this-&gt;balance -= $a; echo &quot;Withdrew $a&lt;br&gt;&quot;; }
+                          else echo &quot;Insufficient balance&lt;br&gt;&quot;; }
+  function getBalance() { return $this-&gt;balance; }
+  function details() { echo &quot;Holder: $this-&gt;holder | A/C: $this-&gt;accNo | Balance: $this-&gt;balance&lt;br&gt;&quot;; }
+}
+$acc = new BankAccount(&quot;Ravi&quot;, &quot;SB1001&quot;, 5000);
+$acc-&gt;details(); $acc-&gt;deposit(2000); $acc-&gt;withdraw(1500); $acc-&gt;withdraw(9000);
+echo &quot;Balance: &quot; . $acc-&gt;getBalance() . &quot;&lt;br&gt;&quot;; $acc-&gt;details();</code></pre><h3>C8: User Registration System (sectiona / mydata)</h3><p>Folder <code>MyWebsite/</code>: <code>index.php</code>, <code>style.css</code>, <code>process.php</code>. Create the database with the SQL below (same table as B4, database <code>sectiona</code>).</p><pre><code>CREATE DATABASE sectiona; USE sectiona;
+CREATE TABLE mydata(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL, password VARCHAR(255) NOT NULL);
+
+&lt;!-- index.php --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;
+&lt;div class=&quot;box&quot;&gt;&lt;h2&gt;Welcome to My Website&lt;/h2&gt;&lt;h4&gt;User Registration&lt;/h4&gt;
+&lt;form action=&quot;process.php&quot; method=&quot;post&quot;&gt;
+  &lt;label&gt;Name&lt;/label&gt;&lt;input name=&quot;name&quot; required&gt;
+  &lt;label&gt;Email&lt;/label&gt;&lt;input type=&quot;email&quot; name=&quot;email&quot; required&gt;
+  &lt;label&gt;Password&lt;/label&gt;&lt;input type=&quot;password&quot; name=&quot;password&quot; required&gt;
+  &lt;button&gt;Register&lt;/button&gt;&lt;/form&gt;&lt;/div&gt;
+
+/* style.css */
+body{font-family:sans-serif;background:#f4f4f8} .box{width:320px;margin:60px auto;padding:24px;background:#fff;border-radius:8px}
+input{width:100%;padding:8px;margin:4px 0 12px} button{width:100%;padding:10px;background:#0a7d3c;color:#fff;border:0}
+
+&lt;?php // process.php
+$conn = mysqli_connect(&quot;localhost&quot;, &quot;root&quot;, &quot;&quot;, &quot;sectiona&quot;);
+if (!$conn) die(&quot;Connection failed: &quot; . mysqli_connect_error());
+echo &#x27;&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;&lt;div class=&quot;box&quot;&gt;&#x27;;
+$st = $conn-&gt;prepare(&quot;INSERT INTO mydata(name,email,password) VALUES(?,?,?)&quot;);
+$pw = password_hash($_POST[&quot;password&quot;], PASSWORD_DEFAULT);
+$st-&gt;bind_param(&quot;sss&quot;, $_POST[&quot;name&quot;], $_POST[&quot;email&quot;], $pw);
+if ($st-&gt;execute()) echo &quot;&lt;h3&gt;Registration Successful!&lt;/h3&gt;&lt;p&gt;Name: &quot; . htmlspecialchars($_POST[&quot;name&quot;]) . &quot;&lt;br&gt;Email: &quot; . htmlspecialchars($_POST[&quot;email&quot;]) . &quot;&lt;/p&gt;&quot;;
+else echo &quot;&lt;h3&gt;Error&lt;/h3&gt;&quot; . $conn-&gt;error;
+echo &quot;&lt;/div&gt;&quot;; $conn-&gt;close();</code></pre><h3>C9: Search student by email (GET)</h3><pre><code>&lt;!-- index.php --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;
+&lt;form action=&quot;search.php&quot; method=&quot;get&quot;&gt;&lt;label&gt;Email Address&lt;/label&gt;
+&lt;input type=&quot;email&quot; name=&quot;email&quot; required&gt;&lt;button&gt;Search&lt;/button&gt;&lt;/form&gt;
+
+&lt;?php // search.php
+$conn = mysqli_connect(&quot;localhost&quot;, &quot;root&quot;, &quot;&quot;, &quot;sectiona&quot;);
+if (!$conn) die(&quot;Connection failed: &quot; . mysqli_connect_error());
+$email = $_GET[&quot;email&quot;] ?? &quot;&quot;;
+$st = $conn-&gt;prepare(&quot;SELECT id, name, email, password FROM mydata WHERE email = ?&quot;);
+$st-&gt;bind_param(&quot;s&quot;, $email); $st-&gt;execute();
+$r = $st-&gt;get_result();
+if ($row = $r-&gt;fetch_assoc()) {
+  echo &quot;&lt;div class=&#x27;result&#x27;&gt;&lt;h3&gt;Student Found!&lt;/h3&gt;ID: {$row[&#x27;id&#x27;]}&lt;br&gt;Name: &quot; . htmlspecialchars($row[&#x27;name&#x27;])
+     . &quot;&lt;br&gt;Email: &quot; . htmlspecialchars($row[&#x27;email&#x27;]) . &quot;&lt;br&gt;Password: &quot; . htmlspecialchars($row[&#x27;password&#x27;]) . &quot;&lt;/div&gt;&quot;;
+} else echo &quot;&lt;div class=&#x27;result error&#x27;&gt;&lt;h3&gt;No Record Found&lt;/h3&gt;Student not found.&lt;/div&gt;&quot;;
+$conn-&gt;close();</code></pre><p>Note: if you store passwords with <code>password_hash</code>, the page shows the hash, not the original text. Displaying passwords at all is only for this exercise.</p><h2 id="conn">17. MySQL connection: procedural vs object-oriented</h2>
+<div class="def"><b>Definition:</b> <code>mysqli</code> supports two equivalent styles. <b>Procedural</b> uses functions such as <code>mysqli_connect()</code> and passes <code>$conn</code> to each call. <b>Object-oriented</b> creates a <code>mysqli</code> object and calls methods with <code>-&gt;</code>.</div>
+<table><tr><th>Task</th><th>Procedural</th><th>Object-oriented</th></tr>
+<tr><td>Connect</td><td><code>mysqli_connect($h,$u,$p,$db)</code></td><td><code>new mysqli($h,$u,$p,$db)</code></td></tr>
+<tr><td>Run query</td><td><code>mysqli_query($conn,$sql)</code></td><td><code>$conn-&gt;query($sql)</code></td></tr>
+<tr><td>Fetch row</td><td><code>mysqli_fetch_assoc($res)</code></td><td><code>$res-&gt;fetch_assoc()</code></td></tr>
+<tr><td>Error text</td><td><code>mysqli_connect_error()</code></td><td><code>$e-&gt;getMessage()</code></td></tr>
+<tr><td>Close</td><td><code>mysqli_close($conn)</code></td><td><code>$conn-&gt;close()</code></td></tr></table>
+<p>Both examples use the <code>school</code> database and <code>students</code> table from section 9. From PHP 8.1 mysqli throws exceptions by default, so the code turns reporting on explicitly and catches <code>mysqli_sql_exception</code>. This works on every PHP 7+ version.</p>
+<h3>Procedural connection</h3><pre><code>&lt;?php
+// Procedural style: mysqli_* functions, $conn is passed to each function
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);   // failures throw mysqli_sql_exception
+
+$host = &quot;localhost&quot;;
+$user = &quot;root&quot;;
+$pass = &quot;&quot;;
+$db   = &quot;school&quot;;
+
+try {
+    $conn = mysqli_connect($host, $user, $pass, $db);
+    mysqli_set_charset($conn, &quot;utf8mb4&quot;);
+    echo &quot;Connected successfully (procedural)&quot;;
+
+    $result = mysqli_query($conn, &quot;SELECT id, name FROM students&quot;);
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo &quot;&lt;br&gt;&quot; . $row[&quot;id&quot;] . &quot; - &quot; . htmlspecialchars($row[&quot;name&quot;]);
+    }
+    mysqli_close($conn);
+} catch (mysqli_sql_exception $e) {
+    echo &quot;Database error: &quot; . $e-&gt;getMessage();
+}</code></pre><h3>Object-oriented connection</h3><pre><code>&lt;?php
+// Object-oriented style: a mysqli object and -&gt; methods
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+try {
+    $conn = new mysqli(&quot;localhost&quot;, &quot;root&quot;, &quot;&quot;, &quot;school&quot;);
+    $conn-&gt;set_charset(&quot;utf8mb4&quot;);
+    echo &quot;Connected successfully (OOP)&quot;;
+
+    $result = $conn-&gt;query(&quot;SELECT id, name FROM students&quot;);
+    while ($row = $result-&gt;fetch_assoc()) {
+        echo &quot;&lt;br&gt;&quot; . $row[&quot;id&quot;] . &quot; - &quot; . htmlspecialchars($row[&quot;name&quot;]);
+    }
+    $conn-&gt;close();
+} catch (mysqli_sql_exception $e) {
+    echo &quot;Database error: &quot; . $e-&gt;getMessage();
+}</code></pre><h3>Reusable connection class</h3><pre><code>&lt;?php
+// db.php - reusable connection class (include it in any page)
+class Database
+{
+    private mysqli $conn;
+
+    public function __construct(string $host = &quot;localhost&quot;, string $user = &quot;root&quot;,
+                                string $pass = &quot;&quot;, string $name = &quot;school&quot;)
+    {
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        $this-&gt;conn = new mysqli($host, $user, $pass, $name);
+        $this-&gt;conn-&gt;set_charset(&quot;utf8mb4&quot;);
+    }
+
+    public function getConnection(): mysqli
+    {
+        return $this-&gt;conn;
+    }
+
+    public function close(): void
+    {
+        $this-&gt;conn-&gt;close();
+    }
+}
+
+try {
+    $db   = new Database();
+    $conn = $db-&gt;getConnection();
+    echo &quot;Connected successfully (Database class)&quot;;
+    $db-&gt;close();
+} catch (mysqli_sql_exception $e) {
+    echo &quot;Connection failed: &quot; . $e-&gt;getMessage();
+}</code></pre><div class="use"><b>Use case:</b> Write the class once in <code>db.php</code> and include it in every page, so the host, user and password live in one place.</div><h2 id="crud">18. Complete CRUD mini app (single file)</h2><div class="def"><b>Definition:</b> CRUD = <b>C</b>reate (INSERT), <b>R</b>ead (SELECT), <b>U</b>pdate (UPDATE), <b>D</b>elete (DELETE). This page does all four on the <code>students</code> table, using prepared statements, validation and output escaping.</div><p>Run once in phpMyAdmin:</p><pre><code>CREATE DATABASE IF NOT EXISTS school;
+USE school;
+CREATE TABLE IF NOT EXISTS students (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  email VARCHAR(80) NOT NULL,
+  marks INT NOT NULL
+);</code></pre><p>Save the code below as <code>htdocs/crud/crud.php</code> and open <code>http://localhost/crud/crud.php</code>.</p><pre><code>&lt;?php
+// crud.php - Create, Read, Update, Delete on students(id, name, email, marks)
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+function h($s): string
+{
+    return htmlspecialchars((string) $s, ENT_QUOTES, &quot;UTF-8&quot;);
+}
+
+try {
+    $conn = new mysqli(&quot;localhost&quot;, &quot;root&quot;, &quot;&quot;, &quot;school&quot;);
+    $conn-&gt;set_charset(&quot;utf8mb4&quot;);
+} catch (mysqli_sql_exception $e) {
+    die(&quot;Connection failed: &quot; . h($e-&gt;getMessage()));
+}
+
+$msg  = &quot;&quot;;
+$edit = null;
+
+if ($_SERVER[&quot;REQUEST_METHOD&quot;] === &quot;POST&quot;) {
+    $action = $_POST[&quot;action&quot;] ?? &quot;&quot;;
+    $id     = (int) ($_POST[&quot;id&quot;] ?? 0);
+    $name   = trim($_POST[&quot;name&quot;] ?? &quot;&quot;);
+    $email  = trim($_POST[&quot;email&quot;] ?? &quot;&quot;);
+    $marks  = filter_var($_POST[&quot;marks&quot;] ?? &quot;&quot;, FILTER_VALIDATE_INT,
+                         [&quot;options&quot; =&gt; [&quot;min_range&quot; =&gt; 0, &quot;max_range&quot; =&gt; 100]]);
+    try {
+        if ($action === &quot;delete&quot;) {                                   // DELETE
+            $st = $conn-&gt;prepare(&quot;DELETE FROM students WHERE id = ?&quot;);
+            $st-&gt;bind_param(&quot;i&quot;, $id);
+            $st-&gt;execute();
+            $msg = &quot;Record deleted&quot;;
+        } elseif ($name === &quot;&quot; || !filter_var($email, FILTER_VALIDATE_EMAIL) || $marks === false) {
+            $msg = &quot;Enter a name, a valid email and marks between 0 and 100&quot;;
+        } elseif ($action === &quot;add&quot;) {                                // CREATE
+            $st = $conn-&gt;prepare(&quot;INSERT INTO students (name, email, marks) VALUES (?, ?, ?)&quot;);
+            $st-&gt;bind_param(&quot;ssi&quot;, $name, $email, $marks);
+            $st-&gt;execute();
+            $msg = &quot;Record added&quot;;
+        } elseif ($action === &quot;update&quot;) {                             // UPDATE
+            $st = $conn-&gt;prepare(&quot;UPDATE students SET name = ?, email = ?, marks = ? WHERE id = ?&quot;);
+            $st-&gt;bind_param(&quot;ssii&quot;, $name, $email, $marks, $id);
+            $st-&gt;execute();
+            $msg = &quot;Record updated&quot;;
+        }
+    } catch (mysqli_sql_exception $e) {
+        $msg = &quot;Database error: &quot; . $e-&gt;getMessage();
+    }
+}
+
+if (isset($_GET[&quot;edit&quot;])) {                                           // load a row into the form
+    $eid = (int) $_GET[&quot;edit&quot;];
+    $st  = $conn-&gt;prepare(&quot;SELECT id, name, email, marks FROM students WHERE id = ?&quot;);
+    $st-&gt;bind_param(&quot;i&quot;, $eid);
+    $st-&gt;execute();
+    $edit = $st-&gt;get_result()-&gt;fetch_assoc();
+}
+
+$rows = $conn-&gt;query(&quot;SELECT id, name, email, marks FROM students ORDER BY id DESC&quot;);  // READ
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;Student CRUD&lt;/title&gt;
+&lt;style&gt;
+body{font-family:sans-serif;max-width:720px;margin:30px auto;padding:0 12px}
+input{padding:6px;margin:3px}
+table{border-collapse:collapse;width:100%;margin-top:16px}
+th,td{border:1px solid #ccc;padding:6px;text-align:left}
+.msg{color:#0a6;font-weight:bold}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h2&gt;Student CRUD&lt;/h2&gt;
+&lt;?php if ($msg !== &quot;&quot;) { echo &#x27;&lt;p class=&quot;msg&quot;&gt;&#x27; . h($msg) . &#x27;&lt;/p&gt;&#x27;; } ?&gt;
+
+&lt;form method=&quot;post&quot; action=&quot;crud.php&quot;&gt;
+  &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;&lt;?= $edit ? &#x27;update&#x27; : &#x27;add&#x27; ?&gt;&quot;&gt;
+  &lt;input type=&quot;hidden&quot; name=&quot;id&quot; value=&quot;&lt;?= h($edit[&#x27;id&#x27;] ?? 0) ?&gt;&quot;&gt;
+  &lt;input name=&quot;name&quot; placeholder=&quot;Name&quot; value=&quot;&lt;?= h($edit[&#x27;name&#x27;] ?? &#x27;&#x27;) ?&gt;&quot; required&gt;
+  &lt;input type=&quot;email&quot; name=&quot;email&quot; placeholder=&quot;Email&quot; value=&quot;&lt;?= h($edit[&#x27;email&#x27;] ?? &#x27;&#x27;) ?&gt;&quot; required&gt;
+  &lt;input type=&quot;number&quot; name=&quot;marks&quot; placeholder=&quot;Marks&quot; min=&quot;0&quot; max=&quot;100&quot; value=&quot;&lt;?= h($edit[&#x27;marks&#x27;] ?? &#x27;&#x27;) ?&gt;&quot; required&gt;
+  &lt;button type=&quot;submit&quot;&gt;&lt;?= $edit ? &#x27;Update&#x27; : &#x27;Add&#x27; ?&gt;&lt;/button&gt;
+  &lt;?php if ($edit) { echo &#x27;&lt;a href=&quot;crud.php&quot;&gt;Cancel&lt;/a&gt;&#x27;; } ?&gt;
+&lt;/form&gt;
+
+&lt;table&gt;
+  &lt;tr&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Email&lt;/th&gt;&lt;th&gt;Marks&lt;/th&gt;&lt;th&gt;Actions&lt;/th&gt;&lt;/tr&gt;
+  &lt;?php while ($r = $rows-&gt;fetch_assoc()) { ?&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;?= h($r[&#x27;id&#x27;]) ?&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;?= h($r[&#x27;name&#x27;]) ?&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;?= h($r[&#x27;email&#x27;]) ?&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;?= h($r[&#x27;marks&#x27;]) ?&gt;&lt;/td&gt;
+    &lt;td&gt;
+      &lt;a href=&quot;crud.php?edit=&lt;?= (int) $r[&#x27;id&#x27;] ?&gt;&quot;&gt;Edit&lt;/a&gt;
+      &lt;form method=&quot;post&quot; action=&quot;crud.php&quot; style=&quot;display:inline&quot; onsubmit=&quot;return confirm(&#x27;Delete this record?&#x27;)&quot;&gt;
+        &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;delete&quot;&gt;
+        &lt;input type=&quot;hidden&quot; name=&quot;id&quot; value=&quot;&lt;?= (int) $r[&#x27;id&#x27;] ?&gt;&quot;&gt;
+        &lt;button type=&quot;submit&quot;&gt;Delete&lt;/button&gt;
+      &lt;/form&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;?php } ?&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php $conn-&gt;close(); ?&gt;</code></pre><table><tr><th>Operation</th><th>Trigger</th><th>SQL</th></tr><tr><td>Create</td><td>Form with action=add</td><td><code>INSERT ... VALUES (?,?,?)</code></td></tr><tr><td>Read</td><td>Every page load</td><td><code>SELECT ... ORDER BY id DESC</code></td></tr><tr><td>Update</td><td>Edit link fills form, action=update</td><td><code>UPDATE ... WHERE id=?</code></td></tr><tr><td>Delete</td><td>Delete button (POST + confirm)</td><td><code>DELETE ... WHERE id=?</code></td></tr></table><div class="use"><b>Use case:</b> The same four operations sit behind every admin panel: products, students, users, orders.</div><h2 id="assess">Assessment</h2>
+<h3>A. Multiple choice (instant feedback)</h3>
+<div id="quiz"></div>
+<button onclick="score()">Check score</button><span id="sc" style="font:600 15px system-ui"></span>
+<h3>B. Short answer (2–4 marks each)</h3>
+<ol class="tasks">
+<li>Define class and object. How is <code>$this</code> used?</li>
+<li>Compare public, protected and private with one example each.</li>
+<li>Differentiate default, parameterized and default-argument constructors.</li>
+<li>What is encapsulation? Why are getters and setters useful?</li>
+<li>Explain method overriding and the role of <code>parent::</code>.</li>
+<li>What is the purpose of <code>finally</code>? When does it run?</li>
+<li>Why should prepared statements be used with user input?</li>
+<li>List three differences between GET and POST.</li>
+<li>Why is server-side validation needed even with HTML5 validation?</li>
+<li>Why do checkbox names end with <code>[]</code>?</li></ol>
+<h3>C. Coding tasks (5–10 marks each)</h3>
+<ol class="tasks">
+<li>Create class <code>Book</code> (title, author, private price) with a parameterized constructor, a getter and a setter that rejects negative prices.</li>
+<li>Create <code>Shape</code> with <code>area()</code>; extend it to <code>Circle</code> and <code>Rectangle</code>, overriding <code>area()</code>. Print both.</li>
+<li>Write a <code>safeDivide()</code> function that throws a custom <code>DivideByZeroException</code>; catch it and use <code>finally</code>.</li>
+<li>Connect to a database <code>shop</code> and perform INSERT, SELECT, UPDATE and DELETE on a <code>products(id,name,price)</code> table using prepared statements.</li>
+<li>Build a registration form (name, email, gender radio, hobbies checkboxes, city dropdown) that validates all fields in PHP and stores valid data in MySQL.</li></ol>
+<details class="demo"><summary><b>Answer key: MCQs</b></summary><p>1-B, 2-C, 3-A, 4-B, 5-C, 6-A, 7-B, 8-D, 9-C, 10-B (explanations appear after you answer above).</p></details>
+<h2 id="scn">Scenario-based assessment</h2><p>Read each situation, write your answer, then open the model answer.</p><div class="scn"><b>Scenario 1: Sign-up page crashes on a bad email</b><p>A college club's sign-up form stores whatever users type. A student enters <code>abc@</code> and a name with digits; a later report fails.</p><p><b>Task:</b> Where and how should validation happen? Which functions do you use, and where do the errors appear?</p><details><summary>Model answer</summary><p>Validate in PHP after POST: <code>trim()</code>, <code>filter_var(..., FILTER_VALIDATE_EMAIL)</code>, <code>preg_match()</code> for the name. Collect all errors in an array and show them beside the fields; insert only when the array is empty. HTML5 checks alone can be bypassed.</p></details></div><div class="scn"><b>Scenario 2: Login hijack attempt</b><p>A tester types <code>' OR '1'='1</code> in the search box and sees every student record.</p><p><b>Task:</b> Name the attack, explain why it worked and fix the code.</p><details><summary>Model answer</summary><p>SQL injection: user input was concatenated into the query. Use a prepared statement with <code>?</code> and <code>bind_param("s",$email)</code>; also escape output with <code>htmlspecialchars()</code>.</p></details></div><div class="scn"><b>Scenario 3: Wallet app allows negative balance</b><p>An online wallet lets a script set <code>$wallet->balance = -500</code>.</p><p><b>Task:</b> Redesign the class so this cannot happen. Which operations does it need and which exception can it throw?</p><details><summary>Model answer</summary><p>Make <code>balance</code> private; expose <code>deposit()</code>, <code>withdraw()</code>, <code>getBalance()</code>. In <code>withdraw()</code> throw <code>InsufficientFundsException</code> (extends Exception) when amount &gt; balance; the caller uses try/catch/finally.</p></details></div><div class="scn"><b>Scenario 4: Three user roles, one login</b><p>A portal has Admin, Teacher and Student users; all need login() and profile(), but each has a different dashboard().</p><p><b>Task:</b> Which OOP concepts do you apply? Sketch the classes.</p><details><summary>Model answer</summary><p>Inheritance and overriding: parent <code>User</code> with login() and profile(); children extend it and override <code>dashboard()</code>. Calling <code>$user->dashboard()</code> gives role-specific output. Call <code>parent::__construct()</code> to reuse setup.</p></details></div><div class="scn"><b>Scenario 5: Search page shows the wrong method</b><p>A search page uses POST; users cannot bookmark or share result links, but a registration page uses GET and shows the password in the URL.</p><p><b>Task:</b> Correct both pages and justify.</p><details><summary>Model answer</summary><p>Search: GET (<code>$_GET</code>) so URLs are shareable. Registration/login: POST so passwords are not in the URL, history or logs. GET is for safe read-only requests, POST for changing data.</p></details></div><div class="scn"><b>Scenario 6: Database is down during checkout</b><p>MySQL stops during peak sales and customers see a raw error with the DB username.</p><p><b>Task:</b> How do you handle it gracefully and always release resources?</p><details><summary>Model answer</summary><p>Enable <code>mysqli_report(MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT)</code>, wrap connect/query in try/catch (<code>mysqli_sql_exception</code>), show 'Service busy, try again', log the real message, and close the connection in <code>finally</code>.</p></details></div><div class="scn"><b>Scenario 7: Survey loses checkbox answers</b><p>A survey with hobbies checkboxes only ever stores the last hobby, and unticked boxes cause an 'undefined index' warning.</p><p><b>Task:</b> Find both bugs.</p><details><summary>Model answer</summary><p>Checkbox names need <code>[]</code> (<code>hobbies[]</code>) so PHP receives an array; read it with <code>$_POST['hobbies'] ?? []</code> and store with <code>implode(', ', ...)</code>. Unchecked boxes are never sent.</p></details></div><div class="scn"><b>Scenario 8: Profile photo upload rejected</b><p>Students upload a 5 MB PDF as their profile picture and the server accepts it.</p><p><b>Task:</b> List the checks the script must make and the form change needed.</p><details><summary>Model answer</summary><p>Form needs <code>enctype="multipart/form-data"</code>. In PHP check <code>$_FILES['photo']['error']</code>, extension in jpg/jpeg/png/gif, size &le; 2 MB, then <code>move_uploaded_file()</code>; otherwise show an error message.</p></details></div></main>
+<script>
+var n=0,objs=document.getElementById('objs'),names=["Asha","Ravi","Meena","Kiran","Sita","Arjun"];
+function mk(){var d=document.createElement('div');d.className='obj';d.textContent='$s'+(n+1)+' = '+names[n%6];objs.appendChild(d);n++}
+function ex(t){var ids=['e1','e2','e3','e4'].map(function(i){return document.getElementById(i)});
+ids.forEach(function(b){b.classList.remove('on')});var seq=t?[0,1,2,3]:[0,2,3];
+seq.forEach(function(k,i){setTimeout(function(){ids.forEach(function(b){b.classList.remove('on')});ids[k].classList.add('on')},i*800)})}
+function tryF(e){e.preventDefault();var f=e.target,g=f.querySelector('input[name=g]:checked'),s=[].map.call(f.querySelectorAll('input[name=s]:checked'),function(x){return x.value});
+document.getElementById('post').textContent='$_POST = [\n  "gender" => '+(g?'"'+g.value+'"':'(not sent)')+',\n  "skills" => ['+s.map(function(x){return '"'+x+'"'}).join(', ')+'],\n  "course" => "'+document.getElementById('c').value+'"\n]';return false}
+var Q=[["Which keyword creates an object?",["make","new","object","create"],1,"<code>new ClassName()</code> instantiates an object."],
+["Which member is accessible only inside its own class?",["public","protected","private","static"],2,"private is class-only."],
+["Name of the constructor method in PHP?",["__construct()","construct()","__init__()","new()"],0,"PHP uses __construct()."],
+["Which keyword makes a child class?",["implements","extends","inherits","child"],1,"class B extends A."],
+["What does parent::speak() do?",["Deletes parent method","Creates new object","Calls the parent's version","Makes it private"],2,"It runs the overridden parent method."],
+["Which block always executes?",["finally","catch","try","throw"],0,"finally runs whether or not an error occurred."],
+["Best defence against SQL injection?",["addslashes only","Prepared statements","GET method","Client validation"],1,"Bind parameters separately from SQL."],
+["Which sends data in the URL?",["POST","PUT","DELETE","GET"],3,"GET appends data to the query string."],
+["To receive many checkbox values, name must be:",["skills","skills{}","skills[]","skills()"],2,"The [] makes PHP build an array."],
+["Which function checks a valid email?",["is_email()","filter_var($e, FILTER_VALIDATE_EMAIL)","trim()","strlen()"],1,"filter_var with FILTER_VALIDATE_EMAIL."]];
+var qz=document.getElementById('quiz');
+Q.forEach(function(q,i){var d=document.createElement('div');d.className='q';d.innerHTML='<b>'+(i+1)+'. '+q[0]+'</b>'+q[1].map(function(o,j){return '<label><input type="radio" name="q'+i+'" value="'+j+'"> '+o+'</label>'}).join('')+'<div class="fb" id="fb'+i+'"></div>';
+d.onchange=function(e){var v=+e.target.value,f=document.getElementById('fb'+i);f.className='fb '+(v==q[2]?'good':'wrong');f.innerHTML=(v==q[2]?'Correct. ':'Not quite. ')+q[3]};qz.appendChild(d)});
+function score(){var s=0;Q.forEach(function(q,i){var c=document.querySelector('input[name=q'+i+']:checked');if(c&&+c.value==q[2])s++});document.getElementById('sc').textContent=' Score: '+s+' / '+Q.length}
+</script></body></html>
